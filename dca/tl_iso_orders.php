@@ -78,15 +78,15 @@ class iso_orders_export extends Backend
 		$arrExport = array();
 		$arrExport[] = array(
 			'order_id'		  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['order_id'],	
-			'date'			    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['date'],		
+			'date'			  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['date'],		
 			'lastname'	 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['lastname'],	
 			'firstname' 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['firstname'],	
-			'street'	 	    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['street'],	
-			'postal'	 	    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['postal'],	
-			'city'		 	    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['city'],	
-			'phone'		 	    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['phone'],	
-			'email'		 	    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['email'],	
-			'items'			    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['items'],
+			'street'	 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['street'],	
+			'postal'	 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['postal'],	
+			'city'		 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['city'],	
+			'phone'		 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['phone'],	
+			'email'		 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['email'],	
+			'items'			  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['items'],
 			'grandTotal'	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['grandTotal'],
 		);
 		
@@ -114,18 +114,18 @@ class iso_orders_export extends Backend
 
 			$arrExport[] = array(
 				'order_id'		=> $objOrders->order_id,
-				'date'			  => $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $objOrders->date),
+				'date'			=> $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $objOrders->date),
 				'member'	    => $arrAddress['district'] != '' ? $GLOBALS['TL_LANG']['tl_iso_orders']['member'] : $GLOBALS['TL_LANG']['tl_iso_orders']['other'],
-				'district'	  => $arrDistrict[$arrAddress['district']], 
-				'community'	  => $arrCommunity[$arrAddress['district']][$arrAddress['community']],
+				'district'	    => $arrDistrict[$arrAddress['district']], 
+				'community'	    => $arrCommunity[$arrAddress['district']][$arrAddress['community']],
 				'lastname'	 	=> $arrAddress['lastname'], 
 				'firstname' 	=> $arrAddress['firstname'],
-				'street'	 	  => $arrAddress['street_1'], 
-				'postal'	 	  => $arrAddress['postal'], 
-				'city'		 	  => $arrAddress['city'], 
-				'phone'		 	  => $arrAddress['phone'], 
-				'email'		 	  => $arrAddress['email'], 
-				'items'			  => $arrOrderItems[$objOrders->id],
+				'street'	 	=> $arrAddress['street_1'], 
+				'postal'	 	=> $arrAddress['postal'], 
+				'city'		 	=> $arrAddress['city'], 
+				'phone'		 	=> $arrAddress['phone'], 
+				'email'		 	=> $arrAddress['email'], 
+				'items'			=> $arrOrderItems[$objOrders->id],
 				'grandTotal'	=> $this->Isotope->formatPriceWithCurrency($objOrders->grandTotal),
 			);			   
 		}
@@ -152,7 +152,7 @@ class iso_orders_export extends Backend
 			$output .= '"' . implode( "\";\"", $export ) . "\"\n";
 		}
 
-		echo $output;
+		echo strip_tags($output);
 		exit;
 	}
 	
@@ -172,18 +172,18 @@ class iso_orders_export extends Backend
 		$arrExport = array();
 		$arrExport[] = array(
 			'order_id'		=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['order_id'],	
-			'date'			  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['date'],	
+			'date'			=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['date'],	
 			'lastname'	 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['lastname'],	
 			'firstname' 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['firstname'],	
-			'street'	 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['street'],	
-			'postal'	 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['postal'],	
-			'city'		 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['city'],	
-			'phone'		 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['phone'],	
-			'email'		 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['email'],	
-			'count'			  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['count'],
+			'street'	 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['street'],	
+			'postal'	 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['postal'],	
+			'city'		 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['city'],	
+			'phone'		 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['phone'],	
+			'email'		 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['email'],	
+			'count'			=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['count'],
 			'item_name'		=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['item_name'],
 			'item_price'	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['item_price'],
-			'sum'			    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['sum'],
+			'sum'			=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['sum'],
 		);
 		
 		$objOrders = $this->Database->execute("SELECT * FROM tl_iso_orders ORDER BY order_id ASC");
@@ -194,10 +194,10 @@ class iso_orders_export extends Backend
 		{						
 			$arrOrderItems[$items['pid']][] = array
 			(
-				'count'			  => $items['product_quantity'],
+				'count'			=> $items['product_quantity'],
 				'item_name'		=> html_entity_decode( $items['product_name'] ),
 				'item_price'	=> $this->Isotope->formatPriceWithCurrency($items['price']),
-				'sum'			    => $this->Isotope->formatPriceWithCurrency($items['product_quantity'] * $items['price']),		
+				'sum'			=> $this->Isotope->formatPriceWithCurrency($items['product_quantity'] * $items['price']),		
 			);		
 		}
 
@@ -209,18 +209,18 @@ class iso_orders_export extends Backend
 			{
 				$arrExport[] = array(
 					'order_id'		=> $objOrders->order_id,
-					'date'			  => $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $objOrders->date),
+					'date'			=> $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $objOrders->date),
 					'lastname'	 	=> $arrAddress['lastname'], 
 					'firstname' 	=> $arrAddress['firstname'],
-					'street'	 	  => $arrAddress['street_1'], 
-					'postal'	 	  => $arrAddress['postal'], 
-					'city'		 	  => $arrAddress['city'], 
-					'phone'		 	  => $arrAddress['phone'], 
-					'email'		 	  => $arrAddress['email'], 
-					'count'			  => $item['count'],
+					'street'	 	=> $arrAddress['street_1'], 
+					'postal'	 	=> $arrAddress['postal'], 
+					'city'		 	=> $arrAddress['city'], 
+					'phone'		 	=> $arrAddress['phone'], 
+					'email'		 	=> $arrAddress['email'], 
+					'count'			=> $item['count'],
 					'item_name'		=> $item['item_name'],
 					'item_price'	=> $item['item_price'],
-					'sum'			    => $item['sum'],
+					'sum'			=> $item['sum'],
 				);
 			}			   
 		}
@@ -247,7 +247,7 @@ class iso_orders_export extends Backend
 			$output .= '"' . implode( "\";\"", $export ) . "\"\n";
 		}
 
-		echo $output;
+		echo strip_tags($output);
 		exit;
 	}	
 }		
