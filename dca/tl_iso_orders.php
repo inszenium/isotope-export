@@ -112,17 +112,14 @@ class iso_orders_export extends Backend
 		{
 			$arrAddress = deserialize($objOrders->billing_address);
 
-			$arrExport[] = array(
+			$arrExport[] = array(		
 				'order_id'		=> $objOrders->order_id,
 				'date'			=> $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $objOrders->date),
-				'member'	    => $arrAddress['district'] != '' ? $GLOBALS['TL_LANG']['tl_iso_orders']['member'] : $GLOBALS['TL_LANG']['tl_iso_orders']['other'],
-				'district'	    => $arrDistrict[$arrAddress['district']], 
-				'community'	    => $arrCommunity[$arrAddress['district']][$arrAddress['community']],
 				'lastname'	 	=> $arrAddress['lastname'], 
 				'firstname' 	=> $arrAddress['firstname'],
-				'street'	 	=> $arrAddress['street_1'], 
-				'postal'	 	=> $arrAddress['postal'], 
-				'city'		 	=> $arrAddress['city'], 
+				'street'	 	=> $arrAddress['street_1'],
+				'postal'	 	=> $arrAddress['postal'],
+				'city'		 	=> $arrAddress['city'],
 				'phone'		 	=> $arrAddress['phone'], 
 				'email'		 	=> $arrAddress['email'], 
 				'items'			=> $arrOrderItems[$objOrders->id],
