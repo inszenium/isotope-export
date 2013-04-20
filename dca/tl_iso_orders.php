@@ -103,8 +103,8 @@ class iso_orders_export extends Backend
 					
 			$arrOrderItems[$items['pid']] .= html_entity_decode( 
                                         $items['product_quantity'] . " x " . $items['product_name'] .  
-                                        " á " . $this->Isotope->formatPriceWithCurrency($items['price']) .  
-                                        " (" . $this->Isotope->formatPriceWithCurrency($items['product_quantity'] * $items['price']) . ")"
+                                        " á " . strip_tags($this->Isotope->formatPriceWithCurrency($items['price'])) .  
+                                        " (" . strip_tags($this->Isotope->formatPriceWithCurrency($items['product_quantity'] * $items['price'])) . ")"
                                       );			
 		}
 
@@ -126,7 +126,7 @@ class iso_orders_export extends Backend
 				'phone'		 	=> $arrAddress['phone'], 
 				'email'		 	=> $arrAddress['email'], 
 				'items'			=> $arrOrderItems[$objOrders->id],
-				'grandTotal'	=> $this->Isotope->formatPriceWithCurrency($objOrders->grandTotal),
+				'grandTotal'	=> strip_tags($this->Isotope->formatPriceWithCurrency($objOrders->grandTotal)),
 			);			   
 		}
 
@@ -152,7 +152,7 @@ class iso_orders_export extends Backend
 			$output .= '"' . implode( "\";\"", $export ) . "\"\n";
 		}
 
-		echo strip_tags($output);
+		echo $output;
 		exit;
 	}
 	
@@ -196,8 +196,8 @@ class iso_orders_export extends Backend
 			(
 				'count'			=> $items['product_quantity'],
 				'item_name'		=> html_entity_decode( $items['product_name'] ),
-				'item_price'	=> $this->Isotope->formatPriceWithCurrency($items['price']),
-				'sum'			=> $this->Isotope->formatPriceWithCurrency($items['product_quantity'] * $items['price']),		
+				'item_price'	=> strip_tags($this->Isotope->formatPriceWithCurrency($items['price'])),
+				'sum'			=> strip_tags($this->Isotope->formatPriceWithCurrency($items['product_quantity'] * $items['price'])),		
 			);		
 		}
 
@@ -247,7 +247,7 @@ class iso_orders_export extends Backend
 			$output .= '"' . implode( "\";\"", $export ) . "\"\n";
 		}
 
-		echo strip_tags($output);
+		echo $output;
 		exit;
 	}	
 }		
