@@ -46,6 +46,14 @@ $GLOBALS['TL_DCA']['tl_iso_orders']['list']['global_operations']['export_items']
 	'attributes'		=> 'onclick="Backend.getScrollOffset();"'
 );
 
+$GLOBALS['TL_DCA']['tl_iso_orders']['list']['global_operations']['export_bank'] = array
+(
+	'label'				=> &$GLOBALS['TL_LANG']['tl_iso_orders']['export_bank'],
+	'href'				=> 'key=export_bank',
+	'class'				=> 'header_iso_export_csv isotope-tools',
+	'attributes'		=> 'onclick="Backend.getScrollOffset();"'
+);
+
 /**
  * Class iso_orders_export
  * Provide miscellaneous methods that are used by the data configuration array.
@@ -60,6 +68,7 @@ class iso_orders_export extends Backend
 	{
 		parent::__construct();
 		$this->import('Isotope');
+    $this->loadLanguageFile('countries');
 	}
 	
 	
@@ -78,15 +87,17 @@ class iso_orders_export extends Backend
 		$arrExport = array();
 		$arrExport[] = array(
 			'order_id'		  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['order_id'],	
-			'date'			  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['date'],		
+			'date'			    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['date'],		
+			'company'	 	    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['company'],	
 			'lastname'	 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['lastname'],	
 			'firstname' 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['firstname'],	
-			'street'	 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['street'],	
-			'postal'	 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['postal'],	
-			'city'		 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['city'],	
-			'phone'		 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['phone'],	
-			'email'		 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['email'],	
-			'items'			  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['items'],
+			'street'	 	    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['street'],	
+			'postal'	 	    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['postal'],	
+			'city'		 	    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['city'],	
+			'country'		    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['country'],	
+			'phone'		 	    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['phone'],	
+			'email'		 	    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['email'],	
+			'items'			    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['items'],
 			'grandTotal'	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['grandTotal'],
 		);
 		
@@ -114,15 +125,17 @@ class iso_orders_export extends Backend
 
 			$arrExport[] = array(		
 				'order_id'		=> $objOrders->order_id,
-				'date'			=> $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $objOrders->date),
+				'date'			  => $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $objOrders->date),
+        'company'	  	=> $arrAddress['company'], 
 				'lastname'	 	=> $arrAddress['lastname'], 
 				'firstname' 	=> $arrAddress['firstname'],
-				'street'	 	=> $arrAddress['street_1'],
-				'postal'	 	=> $arrAddress['postal'],
-				'city'		 	=> $arrAddress['city'],
-				'phone'		 	=> $arrAddress['phone'], 
-				'email'		 	=> $arrAddress['email'], 
-				'items'			=> $arrOrderItems[$objOrders->id],
+				'street'	 	  => $arrAddress['street_1'],
+				'postal'	 	  => $arrAddress['postal'],
+				'city'		 	  => $arrAddress['city'],
+				'country'	 	  => $GLOBALS['TL_LANG']['CNT'][$arrAddress['country']],
+				'phone'		 	  => $arrAddress['phone'], 
+				'email'		 	  => $arrAddress['email'], 
+				'items'			  => $arrOrderItems[$objOrders->id],
 				'grandTotal'	=> strip_tags($this->Isotope->formatPriceWithCurrency($objOrders->grandTotal)),
 			);			   
 		}
@@ -169,18 +182,20 @@ class iso_orders_export extends Backend
 		$arrExport = array();
 		$arrExport[] = array(
 			'order_id'		=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['order_id'],	
-			'date'			=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['date'],	
+			'date'			  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['date'],	
+			'company'	 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['company'],	
 			'lastname'	 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['lastname'],	
 			'firstname' 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['firstname'],	
-			'street'	 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['street'],	
-			'postal'	 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['postal'],	
-			'city'		 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['city'],	
-			'phone'		 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['phone'],	
-			'email'		 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['email'],	
-			'count'			=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['count'],
+			'street'	 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['street'],	
+			'postal'	 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['postal'],	
+			'city'		 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['city'],	
+			'country'		  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['country'],	
+			'phone'		 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['phone'],	
+			'email'		 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['email'],	
+			'count'			  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['count'],
 			'item_name'		=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['item_name'],
 			'item_price'	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['item_price'],
-			'sum'			=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['sum'],
+			'sum'			    => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['sum'],
 		);
 		
 		$objOrders = $this->Database->execute("SELECT * FROM tl_iso_orders ORDER BY order_id ASC");
@@ -191,10 +206,10 @@ class iso_orders_export extends Backend
 		{						
 			$arrOrderItems[$items['pid']][] = array
 			(
-				'count'			=> $items['product_quantity'],
+				'count'			  => $items['product_quantity'],
 				'item_name'		=> html_entity_decode( $items['product_name'] ),
 				'item_price'	=> strip_tags($this->Isotope->formatPriceWithCurrency($items['price'])),
-				'sum'			=> strip_tags($this->Isotope->formatPriceWithCurrency($items['product_quantity'] * $items['price'])),		
+				'sum'			    => strip_tags($this->Isotope->formatPriceWithCurrency($items['product_quantity'] * $items['price'])),		
 			);		
 		}
 
@@ -206,20 +221,93 @@ class iso_orders_export extends Backend
 			{
 				$arrExport[] = array(
 					'order_id'		=> $objOrders->order_id,
-					'date'			=> $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $objOrders->date),
+					'date'			  => $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $objOrders->date),
+          'company'	  	=> $arrAddress['company'], 
 					'lastname'	 	=> $arrAddress['lastname'], 
 					'firstname' 	=> $arrAddress['firstname'],
-					'street'	 	=> $arrAddress['street_1'], 
-					'postal'	 	=> $arrAddress['postal'], 
-					'city'		 	=> $arrAddress['city'], 
-					'phone'		 	=> $arrAddress['phone'], 
-					'email'		 	=> $arrAddress['email'], 
-					'count'			=> $item['count'],
+					'street'	 	  => $arrAddress['street_1'], 
+					'postal'	 	  => $arrAddress['postal'], 
+					'city'		 	  => $arrAddress['city'], 
+          'country'	 	  => $GLOBALS['TL_LANG']['CNT'][$arrAddress['country']],
+					'phone'		 	  => $arrAddress['phone'], 
+					'email'		 	  => $arrAddress['email'], 
+					'count'			  => $item['count'],
 					'item_name'		=> $item['item_name'],
 					'item_price'	=> $item['item_price'],
-					'sum'			=> $item['sum'],
+					'sum'			    => $item['sum'],
 				);
 			}			   
+		}
+
+		if (empty($arrExport))
+		{
+			return '<div id="tl_buttons">
+					<a href="'.ampersand(str_replace('&key=export_order', '', $this->Environment->request)).'" class="header_back" title="'.specialchars($GLOBALS['TL_LANG']['MSC']['backBT']).'">'.$GLOBALS['TL_LANG']['MSC']['backBT'].'</a>
+					</div>
+					<p class="tl_gerror">'. $GLOBALS['TL_LANG']['MSC']['noOrders'] .'</p>';
+		}
+
+		header('Content-Type: application/csv');
+		header('Content-Transfer-Encoding: binary');
+		header('Content-Disposition: attachment; filename="isotope_items_export_' . $this->parseDate($GLOBALS['TL_CONFIG']['dateFormat'], time()) . '_' . $this->parseDate($GLOBALS['TL_CONFIG']['timeFormat'], time()) .'.csv"');
+		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header('Pragma: public');
+		header('Expires: 0');
+
+		$output = '';
+
+		foreach ($arrExport as $export)
+		{
+			$output .= '"' . implode( "\";\"", $export ) . "\"\n";
+		}
+
+		echo $output;
+		exit;
+	}	
+  
+  /**
+	 * Export orders and send them to browser as file
+	 * @param DataContainer
+	 * @return string
+	 */
+	public function exportBank()
+	{		
+		if ($this->Input->get('key') != 'export_bank')
+		{
+			return '';
+		}
+
+		$arrExport = array();
+		$arrExport[] = array(
+			'company'	 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['company'],	
+			'lastname'	 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['lastname'],	
+			'firstname' 	=> $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['firstname'],	
+			'street'	 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['street'],	
+			'postal'	 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['postal'],	
+			'city'		 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['city'],	
+			'country'		  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['country'],	
+			'phone'		 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['phone'],	
+			'email'		 	  => $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['email'],	
+		);
+		
+		$objOrders = $this->Database->execute("SELECT billing_address FROM tl_iso_orders ORDER BY order_id ASC");
+
+		while ($objOrders->next())
+		{
+			$arrAddress = deserialize($objOrders->billing_address);
+	
+      $arrExport[$arrAddress['company']] = array(
+        'company'	  	=> $arrAddress['company'], 
+        'lastname'	 	=> $arrAddress['lastname'], 
+        'firstname' 	=> $arrAddress['firstname'],
+        'street'	 	  => $arrAddress['street_1'], 
+        'postal'	 	  => $arrAddress['postal'], 
+        'city'		 	  => $arrAddress['city'], 
+        'country'	 	  => $GLOBALS['TL_LANG']['CNT'][$arrAddress['country']],
+        'phone'		 	  => $arrAddress['phone'], 
+        'email'		 	  => $arrAddress['email'],
+      );
+		   
 		}
 
 		if (empty($arrExport))

@@ -31,11 +31,13 @@
  */
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['order_id']		="Bestell-ID";	
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['date'	]			  ="Zeitpunkt der Bestellung";	
+$GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['company']			="Firma";
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['lastname']		="Name";	
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['firstname']		="Vorname";	
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['street']			="Straße";	
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['postal']			="PLZ";	
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['city']			  ="Ort";	
+$GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['country']			="Land";	
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['phone']			  ="Telefon";	
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['email']			  ="Mailadresse";	
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['items']			  ="bestellte Produkte mit Preisen";
@@ -58,4 +60,9 @@ $GLOBALS['TL_LANG']['tl_iso_orders']['export_items'] = array
 (
 	'Exportiere Produkte -> Kunde',
 	'Exportiert alle Bestellungen und legt für jedes Produkte eine seperate Zeile an.'
+);  
+$GLOBALS['TL_LANG']['tl_iso_orders']['export_bank'] = array
+(
+	'Exportiere Daten für die Bank',
+	''
 );  

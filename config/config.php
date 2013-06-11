@@ -30,4 +30,5 @@
  * BACK END MODULES
  */ 
 $GLOBALS['BE_MOD']['isotope']['iso_orders']['export_orders'] = array('iso_orders_export', 'exportOrders');
-$GLOBALS['BE_MOD']['isotope']['iso_orders']['export_items'] = array('iso_orders_export', 'exportItems');
+$GLOBALS['BE_MOD']['isotope']['iso_orders']['export_items']  = array('iso_orders_export', 'exportItems');
+$GLOBALS['BE_MOD']['isotope']['iso_orders']['export_bank']   = array('iso_orders_export', 'exportBank');
