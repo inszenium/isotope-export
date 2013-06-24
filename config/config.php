@@ -1,34 +1,19 @@
 <?php if (!defined('TL_ROOT')) die('You can not access this file directly!');
 
 /**
- * Contao Open Source CMS
- * Copyright (C) 2005-2010 Leo Feyer
+ * IsotopeOrderExport
  *
- * Formerly known as TYPOlight Open Source CMS.
- *
- * This program is free software: you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this program. If not, please visit the Free
- * Software Foundation website at <http://www.gnu.org/licenses/>.
- *
- * PHP version 5
- * @copyright  
- * @author     
- * @license    http://opensource.org/licenses/lgpl-3.0.html
+ * @copyright  Kirsten Roschanski 2013 <http://kirsten-roschanski.de>
+ * @author     Kirsten Roschanski <kirsten.roschanski@kirsten-roschanski.de>
+ * @package    IsotopeOrderExport
+ * @license    LGPL 
+ * @link       https://github.com/katgirl/isotope_order_export
+ * @filesource
  */
 
 /**
  * BACK END MODULES
  */ 
-$GLOBALS['BE_MOD']['isotope']['iso_orders']['export_orders'] = array('iso_orders_export', 'exportOrders');
-$GLOBALS['BE_MOD']['isotope']['iso_orders']['export_items']  = array('iso_orders_export', 'exportItems');
-$GLOBALS['BE_MOD']['isotope']['iso_orders']['export_bank']   = array('iso_orders_export', 'exportBank');
+$GLOBALS['BE_MOD']['isotope']['iso_orders']['export_orders'] = array('IsotopeOrderExport', 'exportOrders');
+$GLOBALS['BE_MOD']['isotope']['iso_orders']['export_items']  = array('IsotopeOrderExport', 'exportItems');
+$GLOBALS['BE_MOD']['isotope']['iso_orders']['export_bank']   = array('IsotopeOrderExport', 'exportBank');
