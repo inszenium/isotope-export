@@ -4,10 +4,10 @@
  * IsotopeOrderExport
  *
  * @copyright  Kirsten Roschanski 2013 <http://kirsten-roschanski.de>
- * @author     Kirsten Roschanski <kirsten.roschanski@kirsten-roschanski.de>
+ * @author     Kirsten Roschanski <kat@kirsten-roschanski.de>
  * @package    IsotopeOrderExport
  * @license    LGPL 
- * @link       https://github.com/katgirl/isotope_order_export
+ * @link       https://github.com/katgirl/isotope-order_export
  * @filesource
  */
 
@@ -39,7 +39,8 @@ class IsotopeOrderExport extends Backend
    */
   private function csv_output()
   {
-    if ( count($this->arrExport) > 1 )
+    
+    if ( count($this->arrExport) < 1 )
     {
       return '<div id="tl_buttons">
           <a href="'.ampersand(str_replace('&key=export_order', '', $this->Environment->request)).'" class="header_back" title="'.specialchars($GLOBALS['TL_LANG']['MSC']['backBT']).'">'.$GLOBALS['TL_LANG']['MSC']['backBT'].'</a>
@@ -82,7 +83,7 @@ class IsotopeOrderExport extends Backend
      
     foreach ($arrKeys as $v)
     {
-            $this->arrExport[$v] = $csvHead[$v];
+      $this->arrExport['head'][$v] = $csvHead[$v];
     }
     
     $objOrders = $this->Database->query("SELECT * FROM tl_iso_orders ORDER BY order_id ASC");
@@ -97,7 +98,7 @@ class IsotopeOrderExport extends Backend
       }
           
       $arrOrderItems[$items['pid']] .= html_entity_decode( 
-                                        $items['product_quantity'] . " x " . $items['product_name'] .  
+                                        $items['product_quantity'] . " x " . $items['product_name'] . " [" . $items['product_sku'] . "] " .
                                         " á " . strip_tags($this->Isotope->formatPriceWithCurrency($items['price'])) .  
                                         " (" . strip_tags($this->Isotope->formatPriceWithCurrency($items['product_quantity'] * $items['price'])) . ")"
                                       );      
@@ -105,6 +106,8 @@ class IsotopeOrderExport extends Backend
 
     while ($objOrders->next())
     {
+      if( isset($arrOrderItems) && is_array($arrOrderItems) && !array_key_exists($objOrders->id, $arrOrderItems) ) { continue; }
+      
       $arrAddress = deserialize($objOrders->billing_address);
 
       $this->arrExport[] = array(    
@@ -143,11 +146,11 @@ class IsotopeOrderExport extends Backend
     }
 
     $csvHead = &$GLOBALS['TL_LANG']['tl_iso_orders']['csv_head'];
-    $arrKeys = array('order_id', 'date', 'company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email', 'count', 'item_name', 'item_price', 'sum');
+    $arrKeys = array('order_id', 'date', 'company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email', 'count', 'item_sku', 'item_name', 'item_price', 'sum');
      
     foreach ($arrKeys as $v)
     {
-            $this->arrExport[$v] = $csvHead[$v];
+      $this->arrExport['head'][$v] = $csvHead[$v];
     }
     
     $objOrders = $this->Database->query("SELECT * FROM tl_iso_orders ORDER BY order_id ASC");
@@ -155,10 +158,11 @@ class IsotopeOrderExport extends Backend
     
     $arrOrderItems = array();
     foreach ( $objOrderItems as $items )
-    {            
+    {                  
       $arrOrderItems[$items['pid']][] = array
       (
         'count'         => $items['product_quantity'],
+        'item_sku'      => html_entity_decode( $items['product_sku'] ),
         'item_name'     => html_entity_decode( $items['product_name'] ),
         'item_price'    => strip_tags($this->Isotope->formatPriceWithCurrency($items['price'])),
         'sum'           => strip_tags($this->Isotope->formatPriceWithCurrency($items['product_quantity'] * $items['price'])),    
@@ -167,6 +171,8 @@ class IsotopeOrderExport extends Backend
 
     while ($objOrders->next())
     {
+      if( isset($arrOrderItems) && is_array($arrOrderItems) && !array_key_exists($objOrders->id, $arrOrderItems) ) { continue; }
+      
       $arrAddress = deserialize($objOrders->billing_address);
   
       foreach ($arrOrderItems[$objOrders->id] as $item)
@@ -184,6 +190,7 @@ class IsotopeOrderExport extends Backend
           'phone'         => $arrAddress['phone'], 
           'email'         => $arrAddress['email'], 
           'count'         => $item['count'],
+          'item_sku'      => $item['item_sku'],
           'item_name'     => $item['item_name'],
           'item_price'    => $item['item_price'],
           'sum'           => $item['sum'],
@@ -211,13 +218,13 @@ class IsotopeOrderExport extends Backend
      
     foreach ($arrKeys as $v)
     {
-            $this->arrExport[$v] = $csvHead[$v];
+      $this->arrExport['head'][$v] = $csvHead[$v];
     }
 
     $objOrders = $this->Database->query("SELECT billing_address FROM tl_iso_orders ORDER BY order_id ASC");
 
     while ($objOrders->next())
-    {
+    {      
       $arrAddress = deserialize($objOrders->billing_address);
   
       $this->arrExport[$arrAddress['company']] = array(
@@ -232,7 +239,7 @@ class IsotopeOrderExport extends Backend
         'email'         => $arrAddress['email'],
       );       
     }
-    
+  
     // Output
     $this->csv_output();
   }  

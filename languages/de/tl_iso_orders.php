@@ -4,10 +4,10 @@
  * IsotopeOrderExport
  *
  * @copyright  Kirsten Roschanski 2013 <http://kirsten-roschanski.de>
- * @author     Kirsten Roschanski <kirsten.roschanski@kirsten-roschanski.de>
+ * @author     Kirsten Roschanski <kat@kirsten-roschanski.de>
  * @package    IsotopeOrderExport
  * @license    LGPL 
- * @link       https://github.com/katgirl/isotope_order_export
+ * @link       https://github.com/katgirl/isotope-order_export
  * @filesource
  */
 
@@ -28,6 +28,7 @@ $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['email']			  = "Mailadresse";
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['items']			  = "bestellte Produkte mit Preisen";
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['grandTotal']	= "Bruttopreis";
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['count']			  = "Anzahl";
+$GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['item_sku']		= "Artikelnummer";
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['item_name']		= "Produktbezeichnung";
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['subTotal']	  = "Nettopreis";
 $GLOBALS['TL_LANG']['tl_iso_orders']['csv_head']['tax']	        = "MwSt.";

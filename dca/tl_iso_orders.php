@@ -4,10 +4,10 @@
  * IsotopeOrderExport
  *
  * @copyright  Kirsten Roschanski 2013 <http://kirsten-roschanski.de>
- * @author     Kirsten Roschanski <kirsten.roschanski@kirsten-roschanski.de>
+ * @author     Kirsten Roschanski <kat@kirsten-roschanski.de>
  * @package    IsotopeOrderExport
  * @license    LGPL 
- * @link       https://github.com/katgirl/isotope_order_export
+ * @link       https://github.com/katgirl/isotope-order_export
  * @filesource
  */
 
