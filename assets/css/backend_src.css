@@ -1,0 +1,39 @@
+/**
+ * IsotopeOrderExport
+ *
+ * @copyright  centerscreen gmbh 2016 <https://www.center-screen.de>
+ * @author     Kirsten Roschanski <git@kirsten-roschanski.de>
+ * @package    IsotopeOrderExport
+ * @license    LGPL 
+ * @link       https://github.com/center-screen/isotope-order_export
+ * @filesource
+ */
+
+
+.header_isotope-export
+{
+	padding:2px 0px 3px 20px;
+	background-image:url("lightning.png");
+	background-position:left center;
+	background-repeat:no-repeat;
+}
+
+#isotopetoolsmenu
+{
+	display:none;
+	position:absolute;
+	z-index:99999999;
+	background-color:#fff;
+	border:1px solid #ccc;
+	padding:3px 6px;
+	-moz-border-radius:4px;
+	-webkit-border-radius:4px;
+	border-radius:4px;
+}
+
+#isotopetoolsmenu a
+{
+	display:block;
+	padding-top: 3px;
+	white-space: nowrap;
+}

@@ -1,0 +1,33 @@
+{
+    "name":"centerscreen/isotope-order_export",
+    "description":"Collection Export for Isotope eCommerce, an eCommerce extension for Contao Open Source CMS",
+    "keywords":["contao", "isotope", "collection", "export"],
+    "type":"contao-module",
+    "license":"LGPL-3.0+",
+    "authors":[
+        {
+            "name":"centerscreen gmbh",
+            "homepage":"https://www.center-screen.de"
+        }
+    ],
+    "require":{
+        "php":">=5.4",
+        "isotope/isotope-core":"~2.3"
+    },
+    "autoload": {
+        "psr-0": {
+            "Isotope\\": [
+                "library"
+            ]
+        }
+    },
+    "extra":{
+        "contao": {
+            "sources":{
+                "*": "system/modules/isotope-order_export"
+            }
+        }
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
+}
