@@ -37,3 +37,28 @@
 	padding-top: 3px;
 	white-space: nowrap;
 }
+
+
+#isotopetoolsmenu a.infobox
+{
+	background-color:#eff5fa;
+	border:1px solid #eff5fa;
+	padding:3px 10px;
+	-moz-border-radius:4px;
+	-webkit-border-radius:4px;
+	border-radius:4px;
+	color: #444;
+	margin-bottom: 10px;
+}
+
+#isotopetoolsmenu a.infobox h2,
+#isotopetoolsmenu a.infobox h3
+{
+	font-size: .75rem;
+    color: #444;
+}
+
+#isotopetoolsmenu a.infobox strong
+{
+	color: #1899ad;
+}

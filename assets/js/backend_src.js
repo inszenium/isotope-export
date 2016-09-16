@@ -41,7 +41,7 @@ var IsotopeExport =
     })
     .adopt(tools)
     .inject(document.id(document.body))
-    .setStyle('left', $$('a.header_isotope-export')[0].getPosition().x - 7);
+    .setStyle('left', $$('a.header_isotope-export')[0].getPosition().x - 230);
 
     // Hide context menu
     document.id(document.body).addEvent('click', function()
