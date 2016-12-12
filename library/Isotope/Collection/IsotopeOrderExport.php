@@ -208,7 +208,8 @@ class IsotopeOrderExport extends \Backend
 		  if( strlen($strConfig) > 1 ) {
 			$strConfig .= PHP_EOL;
 		  }	
-		  $strConfig .= \Isotope\Translation::get($key) . ": " . $value;
+		  $arrValues = deserialize($value);
+		  $strConfig .= \Isotope\Translation::get($key) . ": " . implode(",", $arrValues);
 		}	
 	  }	
 		
