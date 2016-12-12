@@ -3,11 +3,11 @@
 /**
  * IsotopeOrderExport
  *
- * @copyright  centerscreen gmbh 2016 <https://www.center-screen.de>
- * @author     Kirsten Roschanski <git@kirsten-roschanski.de>
+ * @copyright  inszenium 2016 <https://inszenium.de>
+ * @author     Kirsten Roschanski <kirsten.roschanski@inszenium.de>
  * @package    IsotopeOrderExport
  * @license    LGPL 
- * @link       https://github.com/center-screen/isotope-order_export
+ * @link       https://github.com/inszenium/isotope-export
  * @filesource
  */
 
@@ -41,7 +41,7 @@ $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['sum']             
  */
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['export_information']  = array
 (
-  'Finanziert durch: <br><strong>International Drums&Percussion Camp Weinfelden</strong><br><br>Entwickelt von: <br><strong>centerscreen gmbh Plauen</strong>',
+  'Finanziert durch: <br><strong>International Drums&Percussion Camp Weinfelden</strong><br><br>Entwickelt von: <br><strong>inszenium Plauen</strong>',
   ''
 ); 
  

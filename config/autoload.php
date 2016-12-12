@@ -3,11 +3,11 @@
 /**
  * IsotopeOrderExport
  *
- * @copyright  centerscreen gmbh 2016 <https://www.center-screen.de>
- * @author     Kirsten Roschanski <git@kirsten-roschanski.de>
+ * @copyright  inszenium 2016 <https://inszenium.de>
+ * @author     Kirsten Roschanski <kirsten.roschanski@inszenium.de>
  * @package    IsotopeOrderExport
  * @license    LGPL 
- * @link       https://github.com/center-screen/isotope-order_export
+ * @link       https://github.com/inszenium/isotope-export
  * @filesource
  */
 
