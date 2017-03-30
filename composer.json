@@ -24,7 +24,7 @@
     "extra":{
         "contao": {
             "sources":{
-                "": "system/modules/isotope-export"
+                "": "system/modules/isotope_export"
             }
         }
     },
