@@ -17,14 +17,14 @@
     "autoload": {
         "psr-0": {
             "Isotope\\": [
-                "library"
+                "src"
             ]
         }
     },
     "extra":{
         "contao": {
             "sources":{
-                "": "system/modules/isotope_export"
+                "contao": "system/modules/isotope_export"
             }
         }
     },
