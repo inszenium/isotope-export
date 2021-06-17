@@ -209,7 +209,7 @@ class IsotopeOrderExport extends \Backend
 			$strConfig .= PHP_EOL;
 		  }	
 		  $arrValues = deserialize($value);
-		  $strConfig .= \Isotope\Translation::get($key) . ": " . implode(",", $arrValues);
+		  $strConfig .= \Isotope\Translation::get($key) . ": " . (is_array($arrValues) ? implode(",", $arrValues) : \Isotope\Translation::get($value));
 		}	
 	  }	
 		
