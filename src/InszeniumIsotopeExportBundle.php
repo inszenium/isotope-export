@@ -16,12 +16,15 @@ declare(strict_types=1);
  * @link       https://github.com/inszenium/isotope-export
  */
 
-/**
- * Table tl_iso_product_collection
- */
+namespace Inszenium\IsotopeExport;
 
-$GLOBALS['TL_DCA']['tl_iso_product_collection']['list']['global_operations']['export'] = array
-(
-  'href' => 'key=export',
-  'class' => 'header_theme_import'
-);
+use Symfony\Component\HttpKernel\Bundle\Bundle;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+
+class InszeniumIsotopeExportBundle extends Bundle
+{
+    public function getPath(): string
+    {
+        return \dirname(__DIR__);
+    }
+}
