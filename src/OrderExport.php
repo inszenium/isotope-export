@@ -178,7 +178,7 @@ function toggleSeparator(format) {
     $sheet = $spreadsheet->getActiveSheet();
     $arrKeys = array('order_id', 'order_status', 'date', 'billing_address', 'company', 'lastname', 'firstname', 'street', 'street_2', 'postal', 'city', 'country', 'phone', 'email', 
                                                          'shipping_address', 'company', 'lastname', 'firstname', 'street', 'street_2', 'postal', 'city', 'country', 'phone', 'email', 
-                     'subTotal', 'tax_free_subtotal', 'total', 'tax_free_total', 'tax_label', 'tax_total_price', 'shipping_label', 'shipping_total_price', 'shipping_tax_free_total_price', 'items', 'notes');
+                     'subTotal', 'tax_free_subtotal', 'total', 'tax_free_total', 'tax_label', 'tax_total_price', 'shipping_label', 'shipping_total_price', 'rule_label', 'rule_total_price', 'items', 'notes');
 
     if (class_exists('Veello\IsotopeAffiliatesBundle\VeelloIsotopeAffiliatesBundle')) {
       $arrKeys[] = 'affiliateIdentifier';
@@ -215,6 +215,7 @@ function toggleSeparator(format) {
       $objOrderItems = \Database::getInstance()->query("SELECT sku, name, price, quantity FROM tl_iso_product_collection_item WHERE pid = " . $objOrders->collection_id);
       $objBillingAddress = \Database::getInstance()->query("SELECT * FROM tl_iso_address WHERE id = " . $objOrders->billing_address_id);
       $objShippingAddress = \Database::getInstance()->query("SELECT * FROM tl_iso_address WHERE id = " . $objOrders->shipping_address_id);
+      $objRule = \Database::getInstance()->query("SELECT label, total_price FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'rule'");
       $objTax = \Database::getInstance()->query("SELECT label, total_price FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'tax'");
       $objShipping = \Database::getInstance()->query("SELECT label, total_price, tax_free_total_price FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'shipping'");
       $objAffiliateMember = \Database::getInstance()->query("SELECT company, city  FROM tl_member WHERE id = " . $objOrders->affiliateMember);
@@ -264,7 +265,7 @@ function toggleSeparator(format) {
       $sheet->setCellValue('W' . $row, $GLOBALS['TL_LANG']['CNT'][$objShippingAddress->country]);
       $sheet->setCellValue('X' . $row, $objShippingAddress->phone);
       $sheet->setCellValue('Y' . $row, $objShippingAddress->email);
-      $sheet->setCellValue('Z' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->subTotal))));
+      $sheet->setCellValue('Z' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->subtotal))));
       $sheet->setCellValue('AA' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->tax_free_subtotal))));
       $sheet->setCellValue('AB' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->total))));
       $sheet->setCellValue('AC' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->tax_free_total))));
@@ -272,12 +273,13 @@ function toggleSeparator(format) {
       $sheet->setCellValue('AE' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objTax->total_price))));
       $sheet->setCellValue('AF' . $row, $objShipping->label);
       $sheet->setCellValue('AG' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objShipping->total_price))));
-      $sheet->setCellValue('AH' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objShipping->tax_free_total_price))));
-      $sheet->setCellValue('AI' . $row, $strOrderItems);
-      $sheet->setCellValue('AJ' . $row, $objOrders->notes);
-      $sheet->setCellValue('AK' . $row, $objOrders->affiliateIdentifier);
-      $sheet->setCellValue('AL' . $row, $objAffiliateMember->company);
-      $sheet->setCellValue('AM' . $row, $objAffiliateMember->city);
+      $sheet->setCellValue('AH' . $row, $objRule->label);
+      $sheet->setCellValue('AI' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objRule->total_price))));
+      $sheet->setCellValue('AJ' . $row, $strOrderItems);
+      $sheet->setCellValue('AK' . $row, $objOrders->notes);
+      $sheet->setCellValue('AL' . $row, $objOrders->affiliateIdentifier);
+      $sheet->setCellValue('AM' . $row, $objAffiliateMember->company);
+      $sheet->setCellValue('AN' . $row, $objAffiliateMember->city);
       $row++;
     }
     
@@ -306,6 +308,7 @@ function toggleSeparator(format) {
                                                     FROM tl_iso_product_collection, tl_iso_address 
                                                     WHERE tl_iso_product_collection.billing_address_id = tl_iso_address.id 
                                                       AND type = 'order'
+                                                      AND document_number != '' 
                                                       AND locked >= ? 
                                                       AND locked <= ?
                                                     ORDER BY document_number ASC")
@@ -379,9 +382,10 @@ function toggleSeparator(format) {
                                                     FROM tl_iso_product_collection_item, tl_iso_product_collection, tl_iso_address 
                                                     WHERE tl_iso_product_collection_item.pid = tl_iso_product_collection.id 
                                                       AND tl_iso_product_collection.billing_address_id = tl_iso_address.id 
-                                                      AND type = 'order'
-                                                      AND locked >= ? 
-                                                      AND locked <= ?
+                                                      AND tl_iso_product_collection.type = 'order'
+                                                      AND tl_iso_product_collection.document_number != '' 
+                                                      AND tl_iso_product_collection.locked >= ? 
+                                                      AND tl_iso_product_collection.locked <= ?
                                                     ORDER BY document_number ASC")
                                          ->execute(strtotime($dateFrom . " 00:00:00"), strtotime($dateTo . " 23:59:59")); 
 

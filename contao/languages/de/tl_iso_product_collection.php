@@ -36,14 +36,13 @@ $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['items']           
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['item_sku']            = "Artikelnummer";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['item_name']           = "Produktbezeichnung";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['subTotal']            = "Nettopreis";
-$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['tax_free_subtotal']   = "Nettopreis (Steuerfrei)";
+$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['tax_free_subtotal']   = "Nettopreis (Produkte)";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['total']               = "Bruttopreis";
-$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['tax_free_total']      = "Bruttopreis (Steuerfrei)";
+$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['tax_free_total']      = "Nettopreis (Gesamtsumme)";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['tax_label']           = "Steuersatz";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['tax_total_price']     = "Summe Steuern";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['shipping_label']      = "Versandart";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['shipping_total_price']= "Versandkosten";
-$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['shipping_tax_free_total_price']= "Versandkosten (Steuerfrei)";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['sum']                 = "Summe";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['order_status']        = "Bestellstatus";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['billing_address']     = "Rechnungsadresse";

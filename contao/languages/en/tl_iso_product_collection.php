@@ -57,6 +57,8 @@ $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['affiliateIdentifie
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['affiliateMember']     = "Affiliate Member";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['affiliateComapny']    = "Affiliate Company";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['affiliateCity']       = "Affiliate City";
+$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['rule_label']          = "Rule/Voucher";
+$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['rule_total_price']    = "Discount";
 
 /**
  * Legends
