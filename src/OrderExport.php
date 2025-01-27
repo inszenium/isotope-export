@@ -26,11 +26,13 @@ use Contao\Environment;
 use Contao\StringUtil;
 use Contao\Validator;
 use Contao\Database;
+use Contao\Exception;
 use Isotope\Isotope;
 use Isotope\Interfaces\IsotopeProduct;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Writer\Ods;
 
 /**
  * Class OrderExport
@@ -78,6 +80,11 @@ class OrderExport extends Backend
           case 'export_bank':
               $this->exportBankData($dateFrom, $dateTo, $format, $separator);
               break;
+          case 'export_orders_full':
+              $this->exportFullOrdersData($dateFrom, $dateTo, $format, $separator);
+              break;
+          default:
+              throw new Exception('Unsupported variant: ' . $variant);    
       }
     }
 
@@ -108,7 +115,8 @@ class OrderExport extends Backend
   <div class="widget w50">
     <h3><label for="format">' . $GLOBALS['TL_LANG']['tl_iso_product_collection']['export_format'][0] . '</label></h3>
     <select name="format" id="format" class="tl_select" onchange="toggleSeparator(this.value)">
-      <option value="xlsx">XLSX</option>
+      <option value="xlsx">Office Open XML (.xlsx) Excel 2007 and above</option>
+      <option value="ods">Open Document Format/OASIS (.ods)</option>
       <option value="csv">CSV</option>
     </select>
     <p class="tl_help tl_tip">' . $GLOBALS['TL_LANG']['tl_iso_product_collection']['export_format'][1] . '</p>
@@ -124,12 +132,14 @@ class OrderExport extends Backend
     <p class="tl_help tl_tip">' . $GLOBALS['TL_LANG']['MSC']['separator'][1] . '</p>' : '') . '
   </div>
   <div class="widget w50">
-    <h3><label for="variant">Variant</label></h3>
+    <h3><label for="variant">' . $GLOBALS['TL_LANG']['tl_iso_product_collection']['variant'][0] . '</label></h3>
     <select name="variant" id="variant" class="tl_select">
-      <option value="export_orders"' . $GLOBALS['TL_LANG']['tl_iso_product_collection']['export_orders'][0] . ' (' . $GLOBALS['TL_LANG']['tl_iso_product_collection']['export_orders'][1] . ')</option>
+      <option value="export_orders_full">' . $GLOBALS['TL_LANG']['tl_iso_product_collection']['export_orders_full'][0] . ' (' . $GLOBALS['TL_LANG']['tl_iso_product_collection']['export_orders_full'][1] . ')</option>
+      <option value="export_orders">' . $GLOBALS['TL_LANG']['tl_iso_product_collection']['export_orders'][0] . ' (' . $GLOBALS['TL_LANG']['tl_iso_product_collection']['export_orders'][1] . ')</option>
       <option value="export_items">' . $GLOBALS['TL_LANG']['tl_iso_product_collection']['export_items'][0] . ' (' . $GLOBALS['TL_LANG']['tl_iso_product_collection']['export_items'][1] . ')</option>
       <option value="export_bank">' . $GLOBALS['TL_LANG']['tl_iso_product_collection']['export_bank'][0] . ' (' . $GLOBALS['TL_LANG']['tl_iso_product_collection']['export_bank'][1] . ')</option>
     </select>
+    <p class="tl_help tl_tip">' . $GLOBALS['TL_LANG']['tl_iso_product_collection']['variant'][1] . '</p>
   </div>
 </fieldset>
 
@@ -154,7 +164,127 @@ function toggleSeparator(format) {
 }
 </script>';
 	}
+
+  /**
+   * Export orders and send them to browser as file
+   * @param date $dateFrom
+   * @param date $dateTo
+   * @param string $format
+   * @param string $separator
+   */
+  public function exportFullOrdersData($dateFrom, $dateTo, $format, $separator)
+  {    
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $arrKeys = array('order_id', 'order_status', 'date', 'billing_address', 'company', 'lastname', 'firstname', 'street', 'street_2', 'postal', 'city', 'country', 'phone', 'email', 
+                                                         'shipping_address', 'company', 'lastname', 'firstname', 'street', 'street_2', 'postal', 'city', 'country', 'phone', 'email', 
+                     'subTotal', 'tax_free_subtotal', 'total', 'tax_free_total', 'tax_label', 'tax_total_price', 'shipping_label', 'shipping_total_price', 'shipping_tax_free_total_price', 'items', 'notes');
+
+    if (class_exists('Veello\IsotopeAffiliatesBundle\VeelloIsotopeAffiliatesBundle')) {
+      $arrKeys[] = 'affiliateIdentifier';
+      $arrKeys[] = 'affiliateComapny';
+      $arrKeys[] = 'affiliateCity';
+    }
+
+    foreach ($arrKeys as $k => $v) {
+      
+
+      if($k > 25 && $k < 48) {
+        $sheet->setCellValue('A' . chr(65 + $k%26) . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
+      } else {
+        $sheet->setCellValue(chr(65 + $k) . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
+      }
+    }
+
+    $objOrders = \Database::getInstance()->prepare("SELECT tl_iso_product_collection.*, tl_iso_product_collection.id as collection_id, tl_iso_orderstatus.name as order_status 
+                                                    FROM tl_iso_product_collection, tl_iso_orderstatus
+                                                    WHERE type = 'order'
+                                                      AND document_number != '' 
+                                                      AND locked >= ? 
+                                                      AND locked <= ?
+                                                      AND tl_iso_product_collection.order_status = tl_iso_orderstatus.id
+                                                    ORDER BY document_number ASC")
+                                         ->execute(strtotime($dateFrom . " 00:00:00"), strtotime($dateTo . " 23:59:59"));
+
+    if ($objOrders->numRows < 1) {
+      return '<p class="tl_error">'. $GLOBALS['TL_LANG']['MSC']['noOrders'] .'</p>';
+    }
+
+    $row = 2;
+    while ($objOrders->next()) {
+      $objOrderItems = \Database::getInstance()->query("SELECT sku, name, price, quantity FROM tl_iso_product_collection_item WHERE pid = " . $objOrders->collection_id);
+      $objBillingAddress = \Database::getInstance()->query("SELECT * FROM tl_iso_address WHERE id = " . $objOrders->billing_address_id);
+      $objShippingAddress = \Database::getInstance()->query("SELECT * FROM tl_iso_address WHERE id = " . $objOrders->shipping_address_id);
+      $objTax = \Database::getInstance()->query("SELECT label, total_price FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'tax'");
+      $objShipping = \Database::getInstance()->query("SELECT label, total_price, tax_free_total_price FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'shipping'");
+      $objAffiliateMember = \Database::getInstance()->query("SELECT company, city  FROM tl_member WHERE id = " . $objOrders->affiliateMember);
+      
+      
+      $strOrderItems = '';
+
+      if($objOrderItems->numRows < 1) {
+        continue;
+      }
+
+      while ($objOrderItems->next()) {
+        // wenn schon ein Produkt da ist, dann einen Zeilenumbruch machen für Excel
+        if (strlen($strOrderItems) > 0) {
+          $strOrderItems .= PHP_EOL;
+        }  
   
+        $strOrderItems .= html_entity_decode(
+        $objOrderItems->quantity . " x " . strip_tags($objOrderItems->name) . " [" . $objOrderItems->sku . "] " .
+        " á " . strip_tags(Isotope::formatPriceWithCurrency($objOrderItems->price)) .
+        " (" . strip_tags(Isotope::formatPriceWithCurrency($objOrderItems->quantity * $objOrderItems->price)) . ")"
+        );
+      }
+
+      $sheet->setCellValue('A' . $row, $objOrders->document_number);
+      $sheet->setCellValue('B' . $row, $objOrders->order_status);
+      $sheet->setCellValue('C' . $row, $this->parseDate(Config::get('datimFormat'), $objOrders->locked));
+      $sheet->setCellValue('D' . $row, $objBillingAddress->company . PHP_EOL . $objBillingAddress->firstname . ' ' . $objBillingAddress->lastname . PHP_EOL . $objBillingAddress->street_1 . PHP_EOL . $objBillingAddress->street_2 . PHP_EOL . $objBillingAddress->postal . ' ' . $objBillingAddress->city . PHP_EOL . $GLOBALS['TL_LANG']['CNT'][$objBillingAddress->country] . PHP_EOL . PHP_EOL . $objBillingAddress->phone . PHP_EOL . $objBillingAddress->email);
+      $sheet->setCellValue('E' . $row, $objBillingAddress->company);
+      $sheet->setCellValue('F' . $row, $objBillingAddress->lastname);
+      $sheet->setCellValue('G' . $row, $objBillingAddress->firstname);
+      $sheet->setCellValue('H' . $row, $objBillingAddress->street_1);
+      $sheet->setCellValue('I' . $row, $objBillingAddress->street_2);
+      $sheet->setCellValue('J' . $row, $objBillingAddress->postal);
+      $sheet->setCellValue('K' . $row, $objBillingAddress->city);
+      $sheet->setCellValue('L' . $row, $GLOBALS['TL_LANG']['CNT'][$objBillingAddress->country]);
+      $sheet->setCellValue('M' . $row, $objBillingAddress->phone);
+      $sheet->setCellValue('N' . $row, $objBillingAddress->email);
+      $sheet->setCellValue('O' . $row, $objShippingAddress->company . PHP_EOL . $objShippingAddress->firstname . ' ' . $objShippingAddress->lastname . PHP_EOL . $objShippingAddress->street_1 . PHP_EOL . $objShippingAddress->street_2 . PHP_EOL . $objShippingAddress->postal . ' ' . $objShippingAddress->city . PHP_EOL . $GLOBALS['TL_LANG']['CNT'][$objShippingAddress->country] . PHP_EOL . PHP_EOL . $objShippingAddress->phone . PHP_EOL . $objShippingAddress->email);
+      $sheet->setCellValue('P' . $row, $objShippingAddress->company);
+      $sheet->setCellValue('Q' . $row, $objShippingAddress->lastname);
+      $sheet->setCellValue('R' . $row, $objShippingAddress->firstname);
+      $sheet->setCellValue('S' . $row, $objShippingAddress->street_1);
+      $sheet->setCellValue('T' . $row, $objShippingAddress->street_2);
+      $sheet->setCellValue('U' . $row, $objShippingAddress->postal);
+      $sheet->setCellValue('V' . $row, $objShippingAddress->city);
+      $sheet->setCellValue('W' . $row, $GLOBALS['TL_LANG']['CNT'][$objShippingAddress->country]);
+      $sheet->setCellValue('X' . $row, $objShippingAddress->phone);
+      $sheet->setCellValue('Y' . $row, $objShippingAddress->email);
+      $sheet->setCellValue('Z' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->subTotal))));
+      $sheet->setCellValue('AA' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->tax_free_subtotal))));
+      $sheet->setCellValue('AB' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->total))));
+      $sheet->setCellValue('AC' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->tax_free_total))));
+      $sheet->setCellValue('AD' . $row, $objTax->label);
+      $sheet->setCellValue('AE' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objTax->total_price))));
+      $sheet->setCellValue('AF' . $row, $objShipping->label);
+      $sheet->setCellValue('AG' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objShipping->total_price))));
+      $sheet->setCellValue('AH' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objShipping->tax_free_total_price))));
+      $sheet->setCellValue('AI' . $row, $strOrderItems);
+      $sheet->setCellValue('AJ' . $row, $objOrders->notes);
+      $sheet->setCellValue('AK' . $row, $objOrders->affiliateIdentifier);
+      $sheet->setCellValue('AL' . $row, $objAffiliateMember->company);
+      $sheet->setCellValue('AM' . $row, $objAffiliateMember->city);
+      $row++;
+    }
+    
+    // Output
+    $this->saveToBrowser($spreadsheet, $format, $separator);
+  }
+
   /**
    * Export orders and send them to browser as file
    * @param date $dateFrom
@@ -175,7 +305,7 @@ function toggleSeparator(format) {
     $objOrders = \Database::getInstance()->prepare("SELECT *, tl_iso_product_collection.id as collection_id 
                                                     FROM tl_iso_product_collection, tl_iso_address 
                                                     WHERE tl_iso_product_collection.billing_address_id = tl_iso_address.id 
-                                                      AND (order_status > 0) 
+                                                      AND type = 'order'
                                                       AND locked >= ? 
                                                       AND locked <= ?
                                                     ORDER BY document_number ASC")
@@ -219,8 +349,8 @@ function toggleSeparator(format) {
       $sheet->setCellValue('J' . $row, $objOrders->phone);
       $sheet->setCellValue('K' . $row, $objOrders->email);
       $sheet->setCellValue('L' . $row, $strOrderItems);
-      $sheet->setCellValue('N' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->tax_free_subtotal))));
-      $sheet->setCellValue('O' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->total))));
+      $sheet->setCellValue('M' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->tax_free_subtotal))));
+      $sheet->setCellValue('N' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->total))));
       $row++;
     }
     
@@ -249,7 +379,7 @@ function toggleSeparator(format) {
                                                     FROM tl_iso_product_collection_item, tl_iso_product_collection, tl_iso_address 
                                                     WHERE tl_iso_product_collection_item.pid = tl_iso_product_collection.id 
                                                       AND tl_iso_product_collection.billing_address_id = tl_iso_address.id 
-                                                      AND (order_status > 0) 
+                                                      AND type = 'order'
                                                       AND locked >= ? 
                                                       AND locked <= ?
                                                     ORDER BY document_number ASC")
@@ -317,7 +447,7 @@ function toggleSeparator(format) {
     $objOrders = \Database::getInstance()->prepare("SELECT tl_iso_address.* 
                                                     FROM tl_iso_product_collection, tl_iso_address 
                                                     WHERE tl_iso_product_collection.billing_address_id = tl_iso_address.id 
-                                                      AND (order_status > 0) 
+                                                      AND type = 'order'
                                                       AND locked >= ? 
                                                       AND locked <= ?
                                                     GROUP BY member")
@@ -353,21 +483,34 @@ function toggleSeparator(format) {
    * @param string $separator
    * @return void
    */   
-  protected function saveToBrowser($spreadsheet, $format, $separator) {  
+  protected function saveToBrowser($spreadsheet, $format, $separator) 
+  {  
     // Setze die HTTP-Header für den Download
-    if ($format === 'csv') {
-      header('Content-Type: text/csv');
-      header('Content-Disposition: attachment;filename="export.csv"');
-      header('Cache-Control: max-age=0');
-      $writer = new Csv($spreadsheet);
-      $writer->setDelimiter($separator === 'comma' ? ',' : ($separator === 'semicolon' ? ';' : ($separator === 'tabulator' ? "\t" : "\n")));
-      $writer->save('php://output');
-    } else {
-      header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      header('Content-Disposition: attachment;filename="export.xlsx"');
-      header('Cache-Control: max-age=0');
-      $writer = new Xlsx($spreadsheet);
-      $writer->save('php://output');
+    switch ($format) {
+      case 'csv':
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment;filename="export.csv"');
+        header('Cache-Control: max-age=0');
+        $writer = new Csv($spreadsheet);
+        $writer->setDelimiter($separator === 'comma' ? ',' : ($separator === 'semicolon' ? ';' : ($separator === 'tabulator' ? "\t" : "\n")));
+        $writer->save('php://output');
+        break;
+      case 'xlsx':
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="export.xlsx"');
+        header('Cache-Control: max-age=0');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        break;
+      case 'ods':
+        header('Content-Type: application/vnd.oasis.opendocument.spreadsheet');
+        header('Content-Disposition: attachment;filename="export.ods"');
+        header('Cache-Control: max-age=0');
+        $writer = new Ods($spreadsheet);
+        $writer->save('php://output');
+        break;
+      default:
+        throw new Exception('Unsupported format: ' . $format);  
     }
 
     // Notiz anzeigen
