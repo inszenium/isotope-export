@@ -520,7 +520,7 @@ function toggleSeparator(format) {
             $sheet->setCellValue('L' . $row, 1);
             $sheet->setCellValue('M' . $row, html_entity_decode($objFreeProduct->sku));
             $sheet->setCellValue('N' . $row, html_entity_decode($freeProductName));
-            $sheet->setCellValue('O' . $row, '');
+            $sheet->setCellValue('O' . $row, 'freeProduct');
             $sheet->setCellValue('P' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency(0))));
             $sheet->setCellValue('Q' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency(0))));
             $sheet->setCellValue('R' . $row, $objTax->label);
