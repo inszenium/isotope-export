@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 /*
  * This file is part of Inszenium Isotope eCommerce OrderExport.
- * 
- * (c) inszenium 2025 <https://inszenium.de>
+ * * (c) inszenium 2025 <https://inszenium.de>
  * @license GPL-3.0-or-later
  * For the full copyright and license information,
  * please view the LICENSE file that was distributed with this source code.
@@ -56,6 +55,8 @@ $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['affiliateIdentifie
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['affiliateMember']     = "Affiliate Mitglied";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['affiliateComapny']    = "Affiliate Firma";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['affiliateCity']       = "Affiliate Stadt";
+$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['free_product_sku']    = "Gratis-Produkt SKU";
+$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['free_product_name']   = "Gratis-Produkt Name";
 
 /**
  * Legends

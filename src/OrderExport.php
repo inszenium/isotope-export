@@ -185,6 +185,11 @@ function toggleSeparator(format) {
       $arrKeys[] = 'affiliateCity';
     }
 
+    if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle')) {
+        $arrKeys[] = 'free_product_sku';
+        $arrKeys[] = 'free_product_name';
+    }
+
     foreach ($arrKeys as $k => $v) {
       
 
@@ -221,7 +226,7 @@ function toggleSeparator(format) {
       if (class_exists('Veello\IsotopeAffiliatesBundle\VeelloIsotopeAffiliatesBundle')) {
         $objAffiliateMember = \Database::getInstance()->query("SELECT company, city  FROM tl_member WHERE id = " . $objOrders->affiliateMember);
       }
-      
+
       $strOrderItems = '';
 
       if($objOrderItems->numRows < 1) {
@@ -279,12 +284,20 @@ function toggleSeparator(format) {
       $sheet->setCellValue('AJ' . $row, $strOrderItems);
       $sheet->setCellValue('AK' . $row, $objOrders->notes);
       
+      $colIndex = 11; // Spalte L
+
       if (class_exists('Veello\IsotopeAffiliatesBundle\VeelloIsotopeAffiliatesBundle')) {
-        $sheet->setCellValue('AL' . $row, $objOrders->affiliateIdentifier);
-        $sheet->setCellValue('AM' . $row, $objAffiliateMember->company);
-        $sheet->setCellValue('AN' . $row, $objAffiliateMember->city);
+        $sheet->setCellValueByColumnAndRow($colIndex++, $row, $objOrders->affiliateIdentifier);
+        $sheet->setCellValueByColumnAndRow($colIndex++, $row, $objAffiliateMember->company);
+        $sheet->setCellValueByColumnAndRow($colIndex++, $row, $objAffiliateMember->city);
       }
       
+      if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle') && $objOrders->freeProduct > 0) {
+        $objFreeProduct = \Database::getInstance()->prepare("SELECT sku, name FROM tl_product WHERE id=?")->execute($objOrders->freeProduct);
+        $sheet->setCellValueByColumnAndRow($colIndex++, $row, $objFreeProduct->sku);
+        $sheet->setCellValueByColumnAndRow($colIndex++, $row, $objFreeProduct->name);
+      }
+
       $row++;
     }
     
@@ -303,7 +316,7 @@ function toggleSeparator(format) {
   {    
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
-    $arrKeys = array('order_id', 'date', 'company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email', 'items', 'tax_free_subtotal', 'total');
+    $arrKeys = array('order_id', 'date', 'company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email', 'items', 'tax_free_subtotal', 'total', 'tax_label');
     
     foreach ($arrKeys as $k => $v) {
       $sheet->setCellValue(chr(65 + $k) . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
@@ -326,6 +339,7 @@ function toggleSeparator(format) {
     $row = 2;
     while ($objOrders->next()) {
       $objOrderItems = \Database::getInstance()->query("SELECT sku, name, price, quantity FROM tl_iso_product_collection_item WHERE pid = " . $objOrders->collection_id);
+      $objTax = \Database::getInstance()->query("SELECT label FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'tax'");
       $strOrderItems = '';
 
       if($objOrderItems->numRows < 1) {
@@ -344,6 +358,16 @@ function toggleSeparator(format) {
         " (" . strip_tags(Isotope::formatPriceWithCurrency($objOrderItems->quantity * $objOrderItems->price)) . ")"
         );
       }
+      
+      if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle') && $objOrders->freeProduct > 0) {
+        $objFreeProduct = \Database::getInstance()->prepare("SELECT sku, name FROM tl_product WHERE id=?")->execute($objOrders->freeProduct);
+        if ($objFreeProduct->numRows > 0) {
+            if (strlen($strOrderItems) > 0) {
+                $strOrderItems .= PHP_EOL;
+            }
+            $strOrderItems .= '1 x ' . strip_tags($objFreeProduct->name) . ' [' . $objFreeProduct->sku . ']';
+        }
+      }
 
       $sheet->setCellValue('A' . $row, $objOrders->document_number);
       $sheet->setCellValue('B' . $row, $this->parseDate(Config::get('datimFormat'), $objOrders->locked));
@@ -359,6 +383,7 @@ function toggleSeparator(format) {
       $sheet->setCellValue('L' . $row, $strOrderItems);
       $sheet->setCellValue('M' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->tax_free_subtotal))));
       $sheet->setCellValue('N' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->total))));
+      $sheet->setCellValue('O' . $row, $objTax->label);
       $row++;
     }
     
@@ -377,7 +402,7 @@ function toggleSeparator(format) {
   {    
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
-    $arrKeys = array('order_id', 'date', 'company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email', 'count', 'item_sku', 'item_name', 'item_configuration', 'item_price', 'sum');
+    $arrKeys = array('order_id', 'date', 'company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email', 'count', 'item_sku', 'item_name', 'item_configuration', 'item_price', 'sum', 'tax_label');
    
     foreach ($arrKeys as $k => $v) {
       $sheet->setCellValue(chr(65 + $k) . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
@@ -400,6 +425,7 @@ function toggleSeparator(format) {
 
     $row = 2;
     while ($objOrders->next()) {
+      $objTax = \Database::getInstance()->query("SELECT label FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'tax'");
       $arrConfig = deserialize($objOrders->configuration);
       $strConfig = '';
       if (is_array($arrConfig)) {
@@ -429,7 +455,33 @@ function toggleSeparator(format) {
       $sheet->setCellValue('O' . $row, strip_tags(html_entity_decode($strConfig)));
       $sheet->setCellValue('P' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->price))));
       $sheet->setCellValue('Q' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->quantity * $objOrders->price))));
+      $sheet->setCellValue('R' . $row, $objTax->label);
       $row++;
+
+      if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle') && $objOrders->freeProduct > 0) {
+        $objFreeProduct = \Database::getInstance()->prepare("SELECT sku, name FROM tl_product WHERE id=?")->execute($objOrders->freeProduct);
+        if ($objFreeProduct->numRows > 0) {
+            $sheet->setCellValue('A' . $row, $objOrders->document_number);
+            $sheet->setCellValue('B' . $row, $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $objOrders->locked));
+            $sheet->setCellValue('C' . $row, $objOrders->company);
+            $sheet->setCellValue('D' . $row, $objOrders->lastname);
+            $sheet->setCellValue('E' . $row, $objOrders->firstname);
+            $sheet->setCellValue('F' . $row, $objOrders->street_1);
+            $sheet->setCellValue('G' . $row, $objOrders->postal);
+            $sheet->setCellValue('H' . $row, $objOrders->city);
+            $sheet->setCellValue('I' . $row, $GLOBALS['TL_LANG']['CNT'][$objOrders->country]);
+            $sheet->setCellValue('J' . $row, $objOrders->phone);
+            $sheet->setCellValue('K' . $row, $objOrders->email);
+            $sheet->setCellValue('L' . $row, 1);
+            $sheet->setCellValue('M' . $row, html_entity_decode($objFreeProduct->sku));
+            $sheet->setCellValue('N' . $row, strip_tags(html_entity_decode($objFreeProduct->name)));
+            $sheet->setCellValue('O' . $row, '');
+            $sheet->setCellValue('P' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency(0))));
+            $sheet->setCellValue('Q' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency(0))));
+            $sheet->setCellValue('R' . $row, $objTax->label);
+            $row++;
+        }
+      }
     }
   
     // Output
