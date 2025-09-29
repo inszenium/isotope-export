@@ -486,10 +486,9 @@ function toggleSeparator(format) {
 
       switch ($priceDisplay) {
           case 'net':
-              // Always show net price. If product is gross, subtract tax
               if ($productPriceMode == 'gross') {
-                  $netPrice = $price / (1 + $taxRate);
                   $grossPrice = $price;
+                  $netPrice = $price / (1 + $taxRate);
               } else {
                   $netPrice = $price;
                   $grossPrice = $price * (1 + $taxRate);
@@ -497,10 +496,9 @@ function toggleSeparator(format) {
               break;
           case 'gross':
           case 'legacy':
-              // Always show gross price. If product is net, add tax.
               if ($productPriceMode == 'net') {
-                  $grossPrice = $price * (1 + $taxRate);
                   $netPrice = $price;
+                  $grossPrice = $price * (1 + $taxRate);
               } else {
                   $grossPrice = $price;
                   $netPrice = $price / (1 + $taxRate);
@@ -508,7 +506,6 @@ function toggleSeparator(format) {
               break;
           case 'fixed':
           default:
-              // Price is as entered, tax is inclusive
               $grossPrice = $price;
               $netPrice = $price / (1 + $taxRate);
               break;
