@@ -448,7 +448,7 @@ function toggleSeparator(format) {
         $sheet->getColumnDimension($columnID)->setAutoSize(true);
     }
 
-    $objOrders = \Database::getInstance()->prepare("SELECT *, tl_iso_product_collection.id as collection_id, tl_iso_product_collection_item.tax_id as item_tax_id, tl_iso_product_collection_item.price_mode as item_price_mode
+    $objOrders = \Database::getInstance()->prepare("SELECT *, tl_iso_product_collection.id as collection_id, tl_iso_product_collection_item.tax_id as item_tax_id 
                                                     FROM tl_iso_product_collection_item, tl_iso_product_collection, tl_iso_address 
                                                     WHERE tl_iso_product_collection_item.pid = tl_iso_product_collection.id 
                                                       AND tl_iso_product_collection.billing_address_id = tl_iso_address.id 
@@ -462,7 +462,7 @@ function toggleSeparator(format) {
     if ($objOrders->numRows < 1) {
       return '<p class="tl_error">'. $GLOBALS['TL_LANG']['MSC']['noOrders'] .'</p>';
     }
-
+    
     $priceDisplay = Isotope::getConfig()->priceDisplay;
 
     $row = 2;
@@ -477,34 +477,41 @@ function toggleSeparator(format) {
           }
       }
       
+      $objProduct = \Database::getInstance()->prepare("SELECT price_mode FROM tl_iso_product WHERE id=?")->execute($objOrders->product_id);
+      $productPriceMode = ($objProduct->numRows > 0) ? $objProduct->price_mode : 'gross';
+
       $price = (float)$objOrders->price;
-      $netPrice = $price;
-      $grossPrice = $price;
+      $netPrice = 0;
+      $grossPrice = 0;
 
       switch ($priceDisplay) {
-        case 'net':
-          if ($objOrders->item_price_mode == 'gross') {
-            $netPrice = $price / (1 + $taxRate);
-          }
-          break;
-        case 'gross':
-        case 'legacy':
-          if ($objOrders->item_price_mode == 'net') {
-            $grossPrice = $price * (1 + $taxRate);
-          }
-          break;
-        case 'fixed':
-          $grossPrice = $price;
-          $netPrice = $price / (1 + $taxRate);
-          break;
-      }
-      
-      if ($objOrders->item_price_mode == 'net') {
-          $netPrice = $price;
-          $grossPrice = $price * (1 + $taxRate);
-      } else {
-          $grossPrice = $price;
-          $netPrice = $price / (1 + $taxRate);
+          case 'net':
+              // Always show net price. If product is gross, subtract tax
+              if ($productPriceMode == 'gross') {
+                  $netPrice = $price / (1 + $taxRate);
+                  $grossPrice = $price;
+              } else {
+                  $netPrice = $price;
+                  $grossPrice = $price * (1 + $taxRate);
+              }
+              break;
+          case 'gross':
+          case 'legacy':
+              // Always show gross price. If product is net, add tax.
+              if ($productPriceMode == 'net') {
+                  $grossPrice = $price * (1 + $taxRate);
+                  $netPrice = $price;
+              } else {
+                  $grossPrice = $price;
+                  $netPrice = $price / (1 + $taxRate);
+              }
+              break;
+          case 'fixed':
+          default:
+              // Price is as entered, tax is inclusive
+              $grossPrice = $price;
+              $netPrice = $price / (1 + $taxRate);
+              break;
       }
 
       $arrConfig = deserialize($objOrders->configuration);
