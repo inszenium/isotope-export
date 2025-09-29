@@ -432,11 +432,11 @@ function toggleSeparator(format) {
   {    
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
-    $arrKeys = array('order_id', 'date', 'company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email', 'count', 'item_sku', 'item_name', 'item_configuration', 'item_price', 'sum', 'tax_label');
+    $arrKeys = array('order_id', 'date', 'company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email', 'count', 'item_sku', 'item_name', 'item_configuration', 'item_price_net', 'item_price', 'sum_net', 'sum', 'tax_label');
    
     $lastColumnLetter = '';
     foreach ($arrKeys as $k => $v) {
-      $columnLetter = chr(65 + $k);
+      $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($k + 1);
       $sheet->setCellValue($columnLetter . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
       $lastColumnLetter = $columnLetter;
     }
@@ -448,7 +448,7 @@ function toggleSeparator(format) {
         $sheet->getColumnDimension($columnID)->setAutoSize(true);
     }
 
-    $objOrders = \Database::getInstance()->prepare("SELECT *, tl_iso_product_collection.id as collection_id 
+    $objOrders = \Database::getInstance()->prepare("SELECT *, tl_iso_product_collection.id as collection_id, tl_iso_product_collection_item.tax_id as item_tax_id 
                                                     FROM tl_iso_product_collection_item, tl_iso_product_collection, tl_iso_address 
                                                     WHERE tl_iso_product_collection_item.pid = tl_iso_product_collection.id 
                                                       AND tl_iso_product_collection.billing_address_id = tl_iso_address.id 
@@ -463,9 +463,25 @@ function toggleSeparator(format) {
       return '<p class="tl_error">'. $GLOBALS['TL_LANG']['MSC']['noOrders'] .'</p>';
     }
 
+    $priceMode = Isotope::getConfig()->price_mode;
+
     $row = 2;
     while ($objOrders->next()) {
-      $objTax = \Database::getInstance()->query("SELECT label FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'tax'");
+      $objTax = \Database::getInstance()->query("SELECT label, rate FROM tl_tax_rate WHERE id = " . $objOrders->item_tax_id);
+      $taxRate = ($objTax->numRows > 0) ? $objTax->rate / 100 : 0;
+      
+      $price = $objOrders->price;
+      $netPrice = $price;
+      $grossPrice = $price;
+
+      if ($priceMode == 'gross') {
+          $grossPrice = $price;
+          $netPrice = $price / (1 + $taxRate);
+      } else {
+          $netPrice = $price;
+          $grossPrice = $price * (1 + $taxRate);
+      }
+
       $arrConfig = deserialize($objOrders->configuration);
       $strConfig = '';
       if (is_array($arrConfig)) {
@@ -496,9 +512,11 @@ function toggleSeparator(format) {
       $sheet->setCellValue('N' . $row, html_entity_decode($productName));
       $sheet->setCellValue('O' . $row, strip_tags(html_entity_decode($strConfig)));
       $sheet->getStyle('O' . $row)->getAlignment()->setWrapText(true);
-      $sheet->setCellValue('P' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->price))));
-      $sheet->setCellValue('Q' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->quantity * $objOrders->price))));
-      $sheet->setCellValue('R' . $row, $objTax->label);
+      $sheet->setCellValue('P' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($netPrice))));
+      $sheet->setCellValue('Q' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($grossPrice))));
+      $sheet->setCellValue('R' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($netPrice * $objOrders->quantity))));
+      $sheet->setCellValue('S' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($grossPrice * $objOrders->quantity))));
+      $sheet->setCellValue('T' . $row, $objTax->label);
       $row++;
 
       if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle') && $objOrders->freeProduct > 0) {
@@ -523,7 +541,9 @@ function toggleSeparator(format) {
             $sheet->setCellValue('O' . $row, 'freeProduct');
             $sheet->setCellValue('P' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency(0))));
             $sheet->setCellValue('Q' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency(0))));
-            $sheet->setCellValue('R' . $row, $objTax->label);
+            $sheet->setCellValue('R' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency(0))));
+            $sheet->setCellValue('S' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency(0))));
+            $sheet->setCellValue('T' . $row, '');
             $row++;
         }
       }

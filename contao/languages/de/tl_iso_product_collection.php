@@ -42,11 +42,11 @@ $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['tax_label']       
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['tax_total_price']     = "Summe Steuern";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['shipping_label']      = "Versandart";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['shipping_total_price']= "Versandkosten";
-$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['sum']                 = "Summe";
+$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['sum']                 = "Summe (brutto)";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['order_status']        = "Bestellstatus";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['billing_address']     = "Rechnungsadresse";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['shipping_address']    = "Lieferadresse";
-$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['item_price']          = "Einzelpreis";
+$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['item_price']          = "Einzelpreis (brutto)";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['item_configuration']  = "Konfiguration";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['shipping']            = "Versandart";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['shipping_costs']      = "Versandkosten";
@@ -57,6 +57,9 @@ $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['affiliateComapny']
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['affiliateCity']       = "Affiliate Stadt";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['free_product_sku']    = "Gratis-Produkt SKU";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['free_product_name']   = "Gratis-Produkt Name";
+$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['item_price_net']      = "Einzelpreis (netto)";
+$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['sum_net']             = "Summe (netto)";
+
 
 /**
  * Legends

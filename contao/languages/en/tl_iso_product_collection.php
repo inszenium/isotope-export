@@ -43,11 +43,11 @@ $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['tax_total_price'] 
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['shipping_label']      = "Shipping Method";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['shipping_total_price']= "Shipping Costs";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['shipping_tax_free_total_price']= "Shipping Costs (Tax-Free)";
-$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['sum']                 = "Total";
+$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['sum']                 = "Total (gross)";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['order_status']        = "Order Status";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['billing_address']     = "Billing Address";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['shipping_address']    = "Shipping Address";
-$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['item_price']          = "Unit Price";
+$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['item_price']          = "Unit Price (gross)";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['item_configuration']  = "Configuration";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['shipping']            = "Shipping Method";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['shipping_costs']      = "Shipping Costs";
@@ -60,6 +60,8 @@ $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['rule_label']      
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['rule_total_price']    = "Discount";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['free_product_sku']    = "Free Product SKU";
 $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['free_product_name']   = "Free Product Name";
+$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['item_price_net']      = "Unit Price (net)";
+$GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head']['sum_net']             = "Total (net)";
 
 /**
  * Legends
