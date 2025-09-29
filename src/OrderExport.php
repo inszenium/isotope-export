@@ -483,11 +483,11 @@ function toggleSeparator(format) {
 
       switch ($priceDisplay) {
           case 'net':
-          case 'fixed':
               $netPrice = $price;
               $grossPrice = $price * (1 + $taxRate);
               break;
           case 'gross':
+          case 'fixed':
           default:
               $grossPrice = $price;
               $netPrice = $price / (1 + $taxRate);
@@ -528,7 +528,7 @@ function toggleSeparator(format) {
       $sheet->setCellValue('Q' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($grossPrice))));
       $sheet->setCellValue('R' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($netPrice * $objOrders->quantity))));
       $sheet->setCellValue('S' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($grossPrice * $objOrders->quantity))));
-      $sheet->setCellValue('T' . $row, $objTax->label);
+      $sheet->setCellValue('T' . $row, html_entity_decode($objTax->label));
       $row++;
 
       if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle') && $objOrders->freeProduct > 0) {
