@@ -477,34 +477,17 @@ function toggleSeparator(format) {
           }
       }
       
-      $objProduct = \Database::getInstance()->prepare("SELECT price_mode FROM tl_iso_product WHERE id=?")->execute($objOrders->product_id);
-      $productPriceMode = ($objProduct->numRows > 0) ? $objProduct->price_mode : 'gross';
-
       $price = (float)$objOrders->price;
       $netPrice = 0;
       $grossPrice = 0;
 
       switch ($priceDisplay) {
           case 'net':
-              if ($productPriceMode == 'gross') {
-                  $grossPrice = $price;
-                  $netPrice = $price / (1 + $taxRate);
-              } else {
-                  $netPrice = $price;
-                  $grossPrice = $price * (1 + $taxRate);
-              }
+          case 'fixed':
+              $netPrice = $price;
+              $grossPrice = $price * (1 + $taxRate);
               break;
           case 'gross':
-          case 'legacy':
-              if ($productPriceMode == 'net') {
-                  $netPrice = $price;
-                  $grossPrice = $price * (1 + $taxRate);
-              } else {
-                  $grossPrice = $price;
-                  $netPrice = $price / (1 + $taxRate);
-              }
-              break;
-          case 'fixed':
           default:
               $grossPrice = $price;
               $netPrice = $price / (1 + $taxRate);
