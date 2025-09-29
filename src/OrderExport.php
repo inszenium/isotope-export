@@ -432,7 +432,7 @@ function toggleSeparator(format) {
   {    
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
-    $arrKeys = array('order_id', 'date', 'company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email', 'count', 'item_sku', 'item_name', 'item_configuration', 'item_price_net', 'item_price', 'sum_net', 'sum', 'tax_label');
+    $arrKeys = array('order_id', 'date', 'company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email', 'count', 'item_sku', 'item_name', 'item_configuration', 'item_price','item_price_net', 'sum', 'sum_net', 'tax_label');
    
     $lastColumnLetter = '';
     foreach ($arrKeys as $k => $v) {
