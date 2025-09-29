@@ -448,7 +448,7 @@ function toggleSeparator(format) {
         $sheet->getColumnDimension($columnID)->setAutoSize(true);
     }
 
-    $objOrders = \Database::getInstance()->prepare("SELECT *, tl_iso_product_collection.id as collection_id, tl_iso_product_collection_item.tax_id as item_tax_id 
+    $objOrders = \Database::getInstance()->prepare("SELECT *, tl_iso_product_collection.id as collection_id, tl_iso_product_collection_item.tax_id as item_tax_id, tl_iso_product_collection_item.price_mode as item_price_mode
                                                     FROM tl_iso_product_collection_item, tl_iso_product_collection, tl_iso_address 
                                                     WHERE tl_iso_product_collection_item.pid = tl_iso_product_collection.id 
                                                       AND tl_iso_product_collection.billing_address_id = tl_iso_address.id 
@@ -463,7 +463,7 @@ function toggleSeparator(format) {
       return '<p class="tl_error">'. $GLOBALS['TL_LANG']['MSC']['noOrders'] .'</p>';
     }
 
-    $priceMode = Isotope::getConfig()->price_mode;
+    $priceDisplay = Isotope::getConfig()->priceDisplay;
 
     $row = 2;
     while ($objOrders->next()) {
@@ -481,12 +481,30 @@ function toggleSeparator(format) {
       $netPrice = $price;
       $grossPrice = $price;
 
-      if ($priceMode == 'gross') {
+      switch ($priceDisplay) {
+        case 'net':
+          if ($objOrders->item_price_mode == 'gross') {
+            $netPrice = $price / (1 + $taxRate);
+          }
+          break;
+        case 'gross':
+        case 'legacy':
+          if ($objOrders->item_price_mode == 'net') {
+            $grossPrice = $price * (1 + $taxRate);
+          }
+          break;
+        case 'fixed':
           $grossPrice = $price;
           $netPrice = $price / (1 + $taxRate);
-      } else {
+          break;
+      }
+      
+      if ($objOrders->item_price_mode == 'net') {
           $netPrice = $price;
           $grossPrice = $price * (1 + $taxRate);
+      } else {
+          $grossPrice = $price;
+          $netPrice = $price / (1 + $taxRate);
       }
 
       $arrConfig = deserialize($objOrders->configuration);
