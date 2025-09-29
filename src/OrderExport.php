@@ -293,7 +293,7 @@ function toggleSeparator(format) {
       }
       
       if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle') && $objOrders->freeProduct > 0) {
-        $objFreeProduct = \Database::getInstance()->prepare("SELECT sku, name FROM tl_product WHERE id=?")->execute($objOrders->freeProduct);
+        $objFreeProduct = \Database::getInstance()->prepare("SELECT sku, name FROM tl_iso_product WHERE id=?")->execute($objOrders->freeProduct);
         $sheet->setCellValueByColumnAndRow($colIndex++, $row, $objFreeProduct->sku);
         $sheet->setCellValueByColumnAndRow($colIndex++, $row, $objFreeProduct->name);
       }
@@ -360,7 +360,7 @@ function toggleSeparator(format) {
       }
       
       if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle') && $objOrders->freeProduct > 0) {
-        $objFreeProduct = \Database::getInstance()->prepare("SELECT sku, name FROM tl_product WHERE id=?")->execute($objOrders->freeProduct);
+        $objFreeProduct = \Database::getInstance()->prepare("SELECT sku, name FROM tl_iso_product WHERE id=?")->execute($objOrders->freeProduct);
         if ($objFreeProduct->numRows > 0) {
             if (strlen($strOrderItems) > 0) {
                 $strOrderItems .= PHP_EOL;
@@ -459,7 +459,7 @@ function toggleSeparator(format) {
       $row++;
 
       if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle') && $objOrders->freeProduct > 0) {
-        $objFreeProduct = \Database::getInstance()->prepare("SELECT sku, name FROM tl_product WHERE id=?")->execute($objOrders->freeProduct);
+        $objFreeProduct = \Database::getInstance()->prepare("SELECT sku, name FROM tl_iso_product WHERE id=?")->execute($objOrders->freeProduct);
         if ($objFreeProduct->numRows > 0) {
             $sheet->setCellValue('A' . $row, $objOrders->document_number);
             $sheet->setCellValue('B' . $row, $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $objOrders->locked));
