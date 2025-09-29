@@ -468,9 +468,9 @@ function toggleSeparator(format) {
     $row = 2;
     while ($objOrders->next()) {
       $objTax = \Database::getInstance()->query("SELECT label, rate FROM tl_iso_tax_rate WHERE id = " . $objOrders->item_tax_id);
-      $taxRate = ($objTax->numRows > 0) ? $objTax->rate / 100 : 0;
+      $taxRate = ($objTax->numRows > 0) ? (float)$objTax->rate / 100 : 0;
       
-      $price = $objOrders->price;
+      $price = (float)$objOrders->price;
       $netPrice = $price;
       $grossPrice = $price;
 
