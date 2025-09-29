@@ -233,9 +233,11 @@ function toggleSeparator(format) {
         if (strlen($strOrderItems) > 0) {
           $strOrderItems .= PHP_EOL;
         }  
-  
+        
+        $productName = strip_tags($this->replaceInsertTags($objOrderItems->name));
+
         $strOrderItems .= html_entity_decode(
-        $objOrderItems->quantity . " x " . strip_tags($objOrderItems->name) . " [" . $objOrderItems->sku . "] " .
+        $objOrderItems->quantity . " x " . $productName . " [" . $objOrderItems->sku . "] " .
         " á " . strip_tags(Isotope::formatPriceWithCurrency($objOrderItems->price)) .
         " (" . strip_tags(Isotope::formatPriceWithCurrency($objOrderItems->quantity * $objOrderItems->price)) . ")"
         );
@@ -290,8 +292,9 @@ function toggleSeparator(format) {
       if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle') && $objOrders->freeProduct > 0) {
         $objFreeProduct = \Database::getInstance()->prepare("SELECT sku, name FROM tl_iso_product WHERE id=?")->execute($objOrders->freeProduct);
         if($objFreeProduct->numRows > 0) {
+            $freeProductName = strip_tags($this->replaceInsertTags($objFreeProduct->name));
             $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++) . $row, $objFreeProduct->sku);
-            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++) . $row, $objFreeProduct->name);
+            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++) . $row, $freeProductName);
         } else {
             $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++) . $row, '');
             $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++) . $row, '');
@@ -351,9 +354,11 @@ function toggleSeparator(format) {
         if (strlen($strOrderItems) > 0) {
           $strOrderItems .= PHP_EOL;
         }  
-  
+        
+        $productName = strip_tags($this->replaceInsertTags($objOrderItems->name));
+
         $strOrderItems .= html_entity_decode(
-        $objOrderItems->quantity . " x " . strip_tags($objOrderItems->name) . " [" . $objOrderItems->sku . "] " .
+        $objOrderItems->quantity . " x " . $productName . " [" . $objOrderItems->sku . "] " .
         " á " . strip_tags(Isotope::formatPriceWithCurrency($objOrderItems->price)) .
         " (" . strip_tags(Isotope::formatPriceWithCurrency($objOrderItems->quantity * $objOrderItems->price)) . ")"
         );
@@ -365,7 +370,8 @@ function toggleSeparator(format) {
             if (strlen($strOrderItems) > 0) {
                 $strOrderItems .= PHP_EOL;
             }
-            $strOrderItems .= '1 x ' . strip_tags($objFreeProduct->name) . ' [' . $objFreeProduct->sku . ']';
+            $freeProductName = strip_tags($this->replaceInsertTags($objFreeProduct->name));
+            $strOrderItems .= '1 x ' . $freeProductName . ' [' . $objFreeProduct->sku . ']';
         }
       }
 
@@ -438,6 +444,8 @@ function toggleSeparator(format) {
         }
       }
 
+      $productName = strip_tags($this->replaceInsertTags($objOrders->name));
+
       $sheet->setCellValue('A' . $row, $objOrders->document_number);
       $sheet->setCellValue('B' . $row, $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $objOrders->locked));
       $sheet->setCellValue('C' . $row, $objOrders->company);
@@ -451,7 +459,7 @@ function toggleSeparator(format) {
       $sheet->setCellValue('K' . $row, $objOrders->email);
       $sheet->setCellValue('L' . $row, $objOrders->quantity);
       $sheet->setCellValue('M' . $row, html_entity_decode($objOrders->sku));
-      $sheet->setCellValue('N' . $row, strip_tags(html_entity_decode($objOrders->name)));
+      $sheet->setCellValue('N' . $row, html_entity_decode($productName));
       $sheet->setCellValue('O' . $row, strip_tags(html_entity_decode($strConfig)));
       $sheet->setCellValue('P' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->price))));
       $sheet->setCellValue('Q' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->quantity * $objOrders->price))));
@@ -461,6 +469,8 @@ function toggleSeparator(format) {
       if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle') && $objOrders->freeProduct > 0) {
         $objFreeProduct = \Database::getInstance()->prepare("SELECT sku, name FROM tl_iso_product WHERE id=?")->execute($objOrders->freeProduct);
         if ($objFreeProduct->numRows > 0) {
+            $freeProductName = strip_tags($this->replaceInsertTags($objFreeProduct->name));
+
             $sheet->setCellValue('A' . $row, $objOrders->document_number);
             $sheet->setCellValue('B' . $row, $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $objOrders->locked));
             $sheet->setCellValue('C' . $row, $objOrders->company);
@@ -474,7 +484,7 @@ function toggleSeparator(format) {
             $sheet->setCellValue('K' . $row, $objOrders->email);
             $sheet->setCellValue('L' . $row, 1);
             $sheet->setCellValue('M' . $row, html_entity_decode($objFreeProduct->sku));
-            $sheet->setCellValue('N' . $row, strip_tags(html_entity_decode($objFreeProduct->name)));
+            $sheet->setCellValue('N' . $row, html_entity_decode($freeProductName));
             $sheet->setCellValue('O' . $row, '');
             $sheet->setCellValue('P' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency(0))));
             $sheet->setCellValue('Q' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency(0))));
