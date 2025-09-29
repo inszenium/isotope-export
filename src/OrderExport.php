@@ -284,11 +284,11 @@ function toggleSeparator(format) {
       $sheet->setCellValue('AA' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->tax_free_subtotal))));
       $sheet->setCellValue('AB' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->total))));
       $sheet->setCellValue('AC' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->tax_free_total))));
-      $sheet->setCellValue('AD' . $row, $objTax->label);
+      $sheet->setCellValue('AD' . $row, html_entity_decode($objTax->label));
       $sheet->setCellValue('AE' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objTax->total_price))));
-      $sheet->setCellValue('AF' . $row, $objShipping->label);
+      $sheet->setCellValue('AF' . $row, html_entity_decode($objShipping->label));
       $sheet->setCellValue('AG' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objShipping->total_price))));
-      $sheet->setCellValue('AH' . $row, $objRule->label);
+      $sheet->setCellValue('AH' . $row, html_entity_decode($objRule->label));
       $sheet->setCellValue('AI' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objRule->total_price))));
       $sheet->setCellValue('AJ' . $row, $strOrderItems);
       $sheet->getStyle('AJ' . $row)->getAlignment()->setWrapText(true);
@@ -413,7 +413,7 @@ function toggleSeparator(format) {
       $sheet->getStyle('L' . $row)->getAlignment()->setWrapText(true);
       $sheet->setCellValue('M' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->tax_free_subtotal))));
       $sheet->setCellValue('N' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->total))));
-      $sheet->setCellValue('O' . $row, $objTax->label);
+      $sheet->setCellValue('O' . $row, html_entity_decode($objTax->label));
       $row++;
     }
     
@@ -498,7 +498,7 @@ function toggleSeparator(format) {
       $sheet->getStyle('O' . $row)->getAlignment()->setWrapText(true);
       $sheet->setCellValue('P' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->price))));
       $sheet->setCellValue('Q' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->quantity * $objOrders->price))));
-      $sheet->setCellValue('R' . $row, $objTax->label);
+      $sheet->setCellValue('R' . $row, html_entity_decode($objTax->label));
       $row++;
 
       if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle') && $objOrders->freeProduct > 0) {
@@ -523,7 +523,7 @@ function toggleSeparator(format) {
             $sheet->setCellValue('O' . $row, 'freeProduct');
             $sheet->setCellValue('P' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency(0))));
             $sheet->setCellValue('Q' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency(0))));
-            $sheet->setCellValue('R' . $row, $objTax->label);
+            $sheet->setCellValue('R' . $row, html_entity_decode($objTax->label));
             $row++;
         }
       }
