@@ -191,13 +191,8 @@ function toggleSeparator(format) {
     }
 
     foreach ($arrKeys as $k => $v) {
-      
-
-      if($k > 25 && $k < 48) {
-        $sheet->setCellValue('A' . chr(65 + $k%26) . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
-      } else {
-        $sheet->setCellValue(chr(65 + $k) . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
-      }
+        $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($k + 1);
+        $sheet->setCellValue($columnLetter . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
     }
 
     $objOrders = \Database::getInstance()->prepare("SELECT tl_iso_product_collection.*, tl_iso_product_collection.id as collection_id, tl_iso_orderstatus.name as order_status 
@@ -226,7 +221,7 @@ function toggleSeparator(format) {
       if (class_exists('Veello\IsotopeAffiliatesBundle\VeelloIsotopeAffiliatesBundle')) {
         $objAffiliateMember = \Database::getInstance()->query("SELECT company, city  FROM tl_member WHERE id = " . $objOrders->affiliateMember);
       }
-
+      
       $strOrderItems = '';
 
       if($objOrderItems->numRows < 1) {
@@ -284,18 +279,23 @@ function toggleSeparator(format) {
       $sheet->setCellValue('AJ' . $row, $strOrderItems);
       $sheet->setCellValue('AK' . $row, $objOrders->notes);
       
-      $colIndex = 11; // Spalte L
+      $colIndex = 38; // Column AL
 
       if (class_exists('Veello\IsotopeAffiliatesBundle\VeelloIsotopeAffiliatesBundle')) {
-        $sheet->setCellValueByColumnAndRow($colIndex++, $row, $objOrders->affiliateIdentifier);
-        $sheet->setCellValueByColumnAndRow($colIndex++, $row, $objAffiliateMember->company);
-        $sheet->setCellValueByColumnAndRow($colIndex++, $row, $objAffiliateMember->city);
+        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++) . $row, $objOrders->affiliateIdentifier);
+        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++) . $row, $objAffiliateMember->company);
+        $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++) . $row, $objAffiliateMember->city);
       }
       
       if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle') && $objOrders->freeProduct > 0) {
         $objFreeProduct = \Database::getInstance()->prepare("SELECT sku, name FROM tl_iso_product WHERE id=?")->execute($objOrders->freeProduct);
-        $sheet->setCellValueByColumnAndRow($colIndex++, $row, $objFreeProduct->sku);
-        $sheet->setCellValueByColumnAndRow($colIndex++, $row, $objFreeProduct->name);
+        if($objFreeProduct->numRows > 0) {
+            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++) . $row, $objFreeProduct->sku);
+            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++) . $row, $objFreeProduct->name);
+        } else {
+            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++) . $row, '');
+            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++) . $row, '');
+        }
       }
 
       $row++;
