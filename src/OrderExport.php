@@ -2,8 +2,7 @@
 
 /*
  * This file is part of Inszenium Isotope eCommerce OrderExport.
- * 
- * (c) inszenium 2025 <https://inszenium.de>
+ * * (c) inszenium 2025 <https://inszenium.de>
  * @license GPL-3.0-or-later
  * For the full copyright and license information,
  * please view the LICENSE file that was distributed with this source code.
@@ -218,8 +217,10 @@ function toggleSeparator(format) {
       $objRule = \Database::getInstance()->query("SELECT label, total_price FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'rule'");
       $objTax = \Database::getInstance()->query("SELECT label, total_price FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'tax'");
       $objShipping = \Database::getInstance()->query("SELECT label, total_price, tax_free_total_price FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'shipping'");
-      $objAffiliateMember = \Database::getInstance()->query("SELECT company, city  FROM tl_member WHERE id = " . $objOrders->affiliateMember);
       
+      if (class_exists('Veello\IsotopeAffiliatesBundle\VeelloIsotopeAffiliatesBundle')) {
+        $objAffiliateMember = \Database::getInstance()->query("SELECT company, city  FROM tl_member WHERE id = " . $objOrders->affiliateMember);
+      }
       
       $strOrderItems = '';
 
@@ -277,9 +278,13 @@ function toggleSeparator(format) {
       $sheet->setCellValue('AI' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objRule->total_price))));
       $sheet->setCellValue('AJ' . $row, $strOrderItems);
       $sheet->setCellValue('AK' . $row, $objOrders->notes);
-      $sheet->setCellValue('AL' . $row, $objOrders->affiliateIdentifier);
-      $sheet->setCellValue('AM' . $row, $objAffiliateMember->company);
-      $sheet->setCellValue('AN' . $row, $objAffiliateMember->city);
+      
+      if (class_exists('Veello\IsotopeAffiliatesBundle\VeelloIsotopeAffiliatesBundle')) {
+        $sheet->setCellValue('AL' . $row, $objOrders->affiliateIdentifier);
+        $sheet->setCellValue('AM' . $row, $objAffiliateMember->company);
+        $sheet->setCellValue('AN' . $row, $objAffiliateMember->city);
+      }
+      
       $row++;
     }
     
@@ -448,8 +453,7 @@ function toggleSeparator(format) {
       $sheet->setCellValue(chr(65 + $k) . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
     }
 
-    $objOrders = \Database::getInstance()->prepare("SELECT tl_iso_address.* 
-                                                    FROM tl_iso_product_collection, tl_iso_address 
+    $objOrders = \Database::getInstance()->prepare("SELECT tl_iso_address.* FROM tl_iso_product_collection, tl_iso_address 
                                                     WHERE tl_iso_product_collection.billing_address_id = tl_iso_address.id 
                                                       AND type = 'order'
                                                       AND locked >= ? 
