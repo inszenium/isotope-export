@@ -190,10 +190,20 @@ function toggleSeparator(format) {
         $arrKeys[] = 'free_product_name';
     }
 
+    $lastColumnLetter = '';
     foreach ($arrKeys as $k => $v) {
         $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($k + 1);
         $sheet->setCellValue($columnLetter . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
+        $lastColumnLetter = $columnLetter;
     }
+
+    $sheet->freezePane('A2');
+    $sheet->getStyle('A1:' . $lastColumnLetter . '1')->getFont()->setBold(true);
+    
+    foreach (range('A', $lastColumnLetter) as $columnID) {
+        $sheet->getColumnDimension($columnID)->setAutoSize(true);
+    }
+
 
     $objOrders = \Database::getInstance()->prepare("SELECT tl_iso_product_collection.*, tl_iso_product_collection.id as collection_id, tl_iso_orderstatus.name as order_status 
                                                     FROM tl_iso_product_collection, tl_iso_orderstatus
@@ -247,6 +257,7 @@ function toggleSeparator(format) {
       $sheet->setCellValue('B' . $row, $objOrders->order_status);
       $sheet->setCellValue('C' . $row, $this->parseDate(Config::get('datimFormat'), $objOrders->locked));
       $sheet->setCellValue('D' . $row, $objBillingAddress->company . PHP_EOL . $objBillingAddress->firstname . ' ' . $objBillingAddress->lastname . PHP_EOL . $objBillingAddress->street_1 . PHP_EOL . $objBillingAddress->street_2 . PHP_EOL . $objBillingAddress->postal . ' ' . $objBillingAddress->city . PHP_EOL . $GLOBALS['TL_LANG']['CNT'][$objBillingAddress->country] . PHP_EOL . PHP_EOL . $objBillingAddress->phone . PHP_EOL . $objBillingAddress->email);
+      $sheet->getStyle('D' . $row)->getAlignment()->setWrapText(true);
       $sheet->setCellValue('E' . $row, $objBillingAddress->company);
       $sheet->setCellValue('F' . $row, $objBillingAddress->lastname);
       $sheet->setCellValue('G' . $row, $objBillingAddress->firstname);
@@ -258,6 +269,7 @@ function toggleSeparator(format) {
       $sheet->setCellValue('M' . $row, $objBillingAddress->phone);
       $sheet->setCellValue('N' . $row, $objBillingAddress->email);
       $sheet->setCellValue('O' . $row, $objShippingAddress->company . PHP_EOL . $objShippingAddress->firstname . ' ' . $objShippingAddress->lastname . PHP_EOL . $objShippingAddress->street_1 . PHP_EOL . $objShippingAddress->street_2 . PHP_EOL . $objShippingAddress->postal . ' ' . $objShippingAddress->city . PHP_EOL . $GLOBALS['TL_LANG']['CNT'][$objShippingAddress->country] . PHP_EOL . PHP_EOL . $objShippingAddress->phone . PHP_EOL . $objShippingAddress->email);
+      $sheet->getStyle('O' . $row)->getAlignment()->setWrapText(true);
       $sheet->setCellValue('P' . $row, $objShippingAddress->company);
       $sheet->setCellValue('Q' . $row, $objShippingAddress->lastname);
       $sheet->setCellValue('R' . $row, $objShippingAddress->firstname);
@@ -279,6 +291,7 @@ function toggleSeparator(format) {
       $sheet->setCellValue('AH' . $row, $objRule->label);
       $sheet->setCellValue('AI' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objRule->total_price))));
       $sheet->setCellValue('AJ' . $row, $strOrderItems);
+      $sheet->getStyle('AJ' . $row)->getAlignment()->setWrapText(true);
       $sheet->setCellValue('AK' . $row, $objOrders->notes);
       
       $colIndex = 38; // Column AL
@@ -321,8 +334,18 @@ function toggleSeparator(format) {
     $sheet = $spreadsheet->getActiveSheet();
     $arrKeys = array('order_id', 'date', 'company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email', 'items', 'tax_free_subtotal', 'total', 'tax_label');
     
+    $lastColumnLetter = '';
     foreach ($arrKeys as $k => $v) {
-      $sheet->setCellValue(chr(65 + $k) . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
+      $columnLetter = chr(65 + $k);
+      $sheet->setCellValue($columnLetter . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
+      $lastColumnLetter = $columnLetter;
+    }
+
+    $sheet->freezePane('A2');
+    $sheet->getStyle('A1:' . $lastColumnLetter . '1')->getFont()->setBold(true);
+
+    foreach (range('A', $lastColumnLetter) as $columnID) {
+        $sheet->getColumnDimension($columnID)->setAutoSize(true);
     }
 
     $objOrders = \Database::getInstance()->prepare("SELECT *, tl_iso_product_collection.id as collection_id 
@@ -387,6 +410,7 @@ function toggleSeparator(format) {
       $sheet->setCellValue('J' . $row, $objOrders->phone);
       $sheet->setCellValue('K' . $row, $objOrders->email);
       $sheet->setCellValue('L' . $row, $strOrderItems);
+      $sheet->getStyle('L' . $row)->getAlignment()->setWrapText(true);
       $sheet->setCellValue('M' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->tax_free_subtotal))));
       $sheet->setCellValue('N' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->total))));
       $sheet->setCellValue('O' . $row, $objTax->label);
@@ -410,8 +434,18 @@ function toggleSeparator(format) {
     $sheet = $spreadsheet->getActiveSheet();
     $arrKeys = array('order_id', 'date', 'company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email', 'count', 'item_sku', 'item_name', 'item_configuration', 'item_price', 'sum', 'tax_label');
    
+    $lastColumnLetter = '';
     foreach ($arrKeys as $k => $v) {
-      $sheet->setCellValue(chr(65 + $k) . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
+      $columnLetter = chr(65 + $k);
+      $sheet->setCellValue($columnLetter . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
+      $lastColumnLetter = $columnLetter;
+    }
+
+    $sheet->freezePane('A2');
+    $sheet->getStyle('A1:' . $lastColumnLetter . '1')->getFont()->setBold(true);
+
+    foreach (range('A', $lastColumnLetter) as $columnID) {
+        $sheet->getColumnDimension($columnID)->setAutoSize(true);
     }
 
     $objOrders = \Database::getInstance()->prepare("SELECT *, tl_iso_product_collection.id as collection_id 
@@ -461,6 +495,7 @@ function toggleSeparator(format) {
       $sheet->setCellValue('M' . $row, html_entity_decode($objOrders->sku));
       $sheet->setCellValue('N' . $row, html_entity_decode($productName));
       $sheet->setCellValue('O' . $row, strip_tags(html_entity_decode($strConfig)));
+      $sheet->getStyle('O' . $row)->getAlignment()->setWrapText(true);
       $sheet->setCellValue('P' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->price))));
       $sheet->setCellValue('Q' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->quantity * $objOrders->price))));
       $sheet->setCellValue('R' . $row, $objTax->label);
@@ -511,8 +546,18 @@ function toggleSeparator(format) {
     $sheet = $spreadsheet->getActiveSheet();
     $arrKeys = array('company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email');
 
+    $lastColumnLetter = '';
     foreach ($arrKeys as $k => $v) {
-      $sheet->setCellValue(chr(65 + $k) . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
+      $columnLetter = chr(65 + $k);
+      $sheet->setCellValue($columnLetter . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
+      $lastColumnLetter = $columnLetter;
+    }
+
+    $sheet->freezePane('A2');
+    $sheet->getStyle('A1:' . $lastColumnLetter . '1')->getFont()->setBold(true);
+
+    foreach (range('A', $lastColumnLetter) as $columnID) {
+        $sheet->getColumnDimension($columnID)->setAutoSize(true);
     }
 
     $objOrders = \Database::getInstance()->prepare("SELECT tl_iso_address.* FROM tl_iso_product_collection, tl_iso_address 
