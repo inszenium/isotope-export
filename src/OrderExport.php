@@ -421,7 +421,7 @@ function toggleSeparator(format) {
     $this->saveToBrowser($spreadsheet, $format, $separator);
   }
   
-  /**
+/**
    * Export orders and send them to browser as file
    * @param date $dateFrom
    * @param date $dateTo
@@ -429,14 +429,14 @@ function toggleSeparator(format) {
    * @param string $separator
    */
   public function exportItemsData($dateFrom, $dateTo, $format, $separator)
-  {    
+  {
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
     $arrKeys = array('order_id', 'date', 'company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email', 'count', 'item_sku', 'item_name', 'item_configuration', 'item_price', 'sum', 'tax_label');
-   
+
     $lastColumnLetter = '';
     foreach ($arrKeys as $k => $v) {
-      $columnLetter = chr(65 + $k);
+      $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($k + 1);
       $sheet->setCellValue($columnLetter . '1', $GLOBALS['TL_LANG']['tl_iso_product_collection']['csv_head'][$v]);
       $lastColumnLetter = $columnLetter;
     }
@@ -448,16 +448,15 @@ function toggleSeparator(format) {
         $sheet->getColumnDimension($columnID)->setAutoSize(true);
     }
 
-    $objOrders = \Database::getInstance()->prepare("SELECT *, tl_iso_product_collection.id as collection_id 
-                                                    FROM tl_iso_product_collection_item, tl_iso_product_collection, tl_iso_address 
-                                                    WHERE tl_iso_product_collection_item.pid = tl_iso_product_collection.id 
-                                                      AND tl_iso_product_collection.billing_address_id = tl_iso_address.id 
-                                                      AND tl_iso_product_collection.type = 'order'
-                                                      AND tl_iso_product_collection.document_number != '' 
-                                                      AND tl_iso_product_collection.locked >= ? 
-                                                      AND tl_iso_product_collection.locked <= ?
+    $objOrders = \Database::getInstance()->prepare("SELECT *, tl_iso_product_collection.id as collection_id
+                                                    FROM tl_iso_product_collection, tl_iso_address
+                                                    WHERE tl_iso_product_collection.billing_address_id = tl_iso_address.id
+                                                      AND type = 'order'
+                                                      AND document_number != ''
+                                                      AND locked >= ?
+                                                      AND locked <= ?
                                                     ORDER BY document_number ASC")
-                                         ->execute(strtotime($dateFrom . " 00:00:00"), strtotime($dateTo . " 23:59:59")); 
+                                         ->execute(strtotime($dateFrom . " 00:00:00"), strtotime($dateTo . " 23:59:59"));
 
     if ($objOrders->numRows < 1) {
       return '<p class="tl_error">'. $GLOBALS['TL_LANG']['MSC']['noOrders'] .'</p>';
@@ -465,45 +464,50 @@ function toggleSeparator(format) {
 
     $row = 2;
     while ($objOrders->next()) {
-      $objTax = \Database::getInstance()->query("SELECT label FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'tax'");
-      $arrConfig = deserialize($objOrders->configuration);
-      $strConfig = '';
-      if (is_array($arrConfig)) {
-        foreach ($arrConfig as $key => $value) {
-          if (strlen($strConfig) > 1) {
-            $strConfig .= PHP_EOL;
+      $objOrderItems = \Database::getInstance()->prepare("SELECT * FROM tl_iso_product_collection_item WHERE pid=?")->execute($objOrders->collection_id);
+
+      while ($objOrderItems->next()) {
+        $objTax = \Database::getInstance()->query("SELECT label FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'tax'");
+        $arrConfig = deserialize($objOrderItems->configuration);
+        $strConfig = '';
+        if (is_array($arrConfig)) {
+          foreach ($arrConfig as $key => $value) {
+            if (strlen($strConfig) > 1) {
+              $strConfig .= PHP_EOL;
+            }
+            $arrValues = deserialize($value);
+            $strConfig .= \Isotope\Translation::get($key) . ": " . (is_array($arrValues) ? implode(",", $arrValues) : \Isotope\Translation::get($value));
           }
-          $arrValues = deserialize($value);
-          $strConfig .= \Isotope\Translation::get($key) . ": " . (is_array($arrValues) ? implode(",", $arrValues) : \Isotope\Translation::get($value));
         }
+
+        $productName = strip_tags($this->replaceInsertTags($objOrderItems->name));
+
+        $sheet->setCellValue('A' . $row, $objOrders->document_number);
+        $sheet->setCellValue('B' . $row, $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $objOrders->locked));
+        $sheet->setCellValue('C' . $row, $objOrders->company);
+        $sheet->setCellValue('D' . $row, $objOrders->lastname);
+        $sheet->setCellValue('E' . $row, $objOrders->firstname);
+        $sheet->setCellValue('F' . $row, $objOrders->street_1);
+        $sheet->setCellValue('G' . $row, $objOrders->postal);
+        $sheet->setCellValue('H' . $row, $objOrders->city);
+        $sheet->setCellValue('I' . $row, $GLOBALS['TL_LANG']['CNT'][$objOrders->country]);
+        $sheet->setCellValue('J' . $row, $objOrders->phone);
+        $sheet->setCellValue('K' . $row, $objOrders->email);
+        $sheet->setCellValue('L' . $row, $objOrderItems->quantity);
+        $sheet->setCellValue('M' . $row, html_entity_decode($objOrderItems->sku));
+        $sheet->setCellValue('N' . $row, html_entity_decode($productName));
+        $sheet->setCellValue('O' . $row, strip_tags(html_entity_decode($strConfig)));
+        $sheet->getStyle('O' . $row)->getAlignment()->setWrapText(true);
+        $sheet->setCellValue('P' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrderItems->price))));
+        $sheet->setCellValue('Q' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrderItems->quantity * $objOrderItems->price))));
+        $sheet->setCellValue('R' . $row, html_entity_decode($objTax->label));
+        $row++;
       }
-
-      $productName = strip_tags($this->replaceInsertTags($objOrders->name));
-
-      $sheet->setCellValue('A' . $row, $objOrders->document_number);
-      $sheet->setCellValue('B' . $row, $this->parseDate($GLOBALS['TL_CONFIG']['datimFormat'], $objOrders->locked));
-      $sheet->setCellValue('C' . $row, $objOrders->company);
-      $sheet->setCellValue('D' . $row, $objOrders->lastname);
-      $sheet->setCellValue('E' . $row, $objOrders->firstname);
-      $sheet->setCellValue('F' . $row, $objOrders->street_1);
-      $sheet->setCellValue('G' . $row, $objOrders->postal);
-      $sheet->setCellValue('H' . $row, $objOrders->city);
-      $sheet->setCellValue('I' . $row, $GLOBALS['TL_LANG']['CNT'][$objOrders->country]);
-      $sheet->setCellValue('J' . $row, $objOrders->phone);
-      $sheet->setCellValue('K' . $row, $objOrders->email);
-      $sheet->setCellValue('L' . $row, $objOrders->quantity);
-      $sheet->setCellValue('M' . $row, html_entity_decode($objOrders->sku));
-      $sheet->setCellValue('N' . $row, html_entity_decode($productName));
-      $sheet->setCellValue('O' . $row, strip_tags(html_entity_decode($strConfig)));
-      $sheet->getStyle('O' . $row)->getAlignment()->setWrapText(true);
-      $sheet->setCellValue('P' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->price))));
-      $sheet->setCellValue('Q' . $row, strip_tags(html_entity_decode(Isotope::formatPriceWithCurrency($objOrders->quantity * $objOrders->price))));
-      $sheet->setCellValue('R' . $row, html_entity_decode($objTax->label));
-      $row++;
 
       if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle') && $objOrders->freeProduct > 0) {
         $objFreeProduct = \Database::getInstance()->prepare("SELECT sku, name FROM tl_iso_product WHERE id=?")->execute($objOrders->freeProduct);
         if ($objFreeProduct->numRows > 0) {
+            $objTax = \Database::getInstance()->query("SELECT label FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'tax'");
             $freeProductName = strip_tags($this->replaceInsertTags($objFreeProduct->name));
 
             $sheet->setCellValue('A' . $row, $objOrders->document_number);
@@ -528,10 +532,10 @@ function toggleSeparator(format) {
         }
       }
     }
-  
+
     // Output
     $this->saveToBrowser($spreadsheet, $format, $separator);
-  }  
+  }
   
   /**
    * Export orders and send them to browser as file
