@@ -9,7 +9,7 @@
  *
  * @author     Kirsten Roschanski <kirsten.roschanski@inszenium.de>
  * @package    InszeniumIsotopeOrderExport
- * @license    LGPL 
+ * @license    LGPL
  * @link       https://github.com/inszenium/isotope-export
  */
 
@@ -47,7 +47,7 @@ class OrderExport extends Backend
     parent::__construct();
     \System::loadLanguageFile('countries');
   }
-  
+
   /**
 	 * Return a form to choose a CSV/XLS file and export it
 	 *
@@ -83,7 +83,7 @@ class OrderExport extends Backend
               $this->exportFullOrdersData($dateFrom, $dateTo, $format, $separator);
               break;
           default:
-              throw new Exception('Unsupported variant: ' . $variant);    
+              throw new Exception('Unsupported variant: ' . $variant);
       }
     }
 
@@ -172,11 +172,11 @@ function toggleSeparator(format) {
    * @param string $separator
    */
   public function exportFullOrdersData($dateFrom, $dateTo, $format, $separator)
-  {    
+  {
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
-    $arrKeys = array('order_id', 'order_status', 'date', 'billing_address', 'company', 'lastname', 'firstname', 'street', 'street_2', 'postal', 'city', 'country', 'phone', 'email', 
-                                                         'shipping_address', 'company', 'lastname', 'firstname', 'street', 'street_2', 'postal', 'city', 'country', 'phone', 'email', 
+    $arrKeys = array('order_id', 'order_status', 'date', 'billing_address', 'company', 'lastname', 'firstname', 'street', 'street_2', 'postal', 'city', 'country', 'phone', 'email',
+                                                         'shipping_address', 'company', 'lastname', 'firstname', 'street', 'street_2', 'postal', 'city', 'country', 'phone', 'email',
                      'subTotal', 'tax_free_subtotal', 'total', 'tax_free_total', 'tax_label', 'tax_total_price', 'shipping_label', 'shipping_total_price', 'rule_label', 'rule_total_price', 'items', 'notes');
 
     if (class_exists('Veello\IsotopeAffiliatesBundle\VeelloIsotopeAffiliatesBundle')) {
@@ -199,17 +199,18 @@ function toggleSeparator(format) {
 
     $sheet->freezePane('A2');
     $sheet->getStyle('A1:' . $lastColumnLetter . '1')->getFont()->setBold(true);
-    
-    foreach (range('A', $lastColumnLetter) as $columnID) {
+
+    $lastColumnIndex = count($arrKeys);
+    for ($i = 1; $i <= $lastColumnIndex; $i++) {
+        $columnID = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i);
         $sheet->getColumnDimension($columnID)->setAutoSize(true);
     }
 
-
-    $objOrders = \Database::getInstance()->prepare("SELECT tl_iso_product_collection.*, tl_iso_product_collection.id as collection_id, tl_iso_orderstatus.name as order_status 
+    $objOrders = \Database::getInstance()->prepare("SELECT tl_iso_product_collection.*, tl_iso_product_collection.id as collection_id, tl_iso_orderstatus.name as order_status
                                                     FROM tl_iso_product_collection, tl_iso_orderstatus
                                                     WHERE type = 'order'
-                                                      AND document_number != '' 
-                                                      AND locked >= ? 
+                                                      AND document_number != ''
+                                                      AND locked >= ?
                                                       AND locked <= ?
                                                       AND tl_iso_product_collection.order_status = tl_iso_orderstatus.id
                                                     ORDER BY document_number ASC")
@@ -227,11 +228,16 @@ function toggleSeparator(format) {
       $objRule = \Database::getInstance()->query("SELECT label, total_price FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'rule'");
       $objTax = \Database::getInstance()->query("SELECT label, total_price FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'tax'");
       $objShipping = \Database::getInstance()->query("SELECT label, total_price, tax_free_total_price FROM tl_iso_product_collection_surcharge WHERE pid = " . $objOrders->collection_id . " AND type = 'shipping'");
-      
+
+      // fallback to the billing address country if not shipping country set. fallback to germany when also not available.
+      if (!$objShippingAddress->county) {
+        $objShippingAddress->country = $objBillingAddress->country ?? 'de';
+      }
+
       if (class_exists('Veello\IsotopeAffiliatesBundle\VeelloIsotopeAffiliatesBundle')) {
         $objAffiliateMember = \Database::getInstance()->query("SELECT company, city  FROM tl_member WHERE id = " . $objOrders->affiliateMember);
       }
-      
+
       $strOrderItems = '';
 
       if($objOrderItems->numRows < 1) {
@@ -242,8 +248,8 @@ function toggleSeparator(format) {
         // wenn schon ein Produkt da ist, dann einen Zeilenumbruch machen für Excel
         if (strlen($strOrderItems) > 0) {
           $strOrderItems .= PHP_EOL;
-        }  
-        
+        }
+
         $productName = strip_tags($this->replaceInsertTags($objOrderItems->name));
 
         $strOrderItems .= html_entity_decode(
@@ -293,7 +299,7 @@ function toggleSeparator(format) {
       $sheet->setCellValue('AJ' . $row, $strOrderItems);
       $sheet->getStyle('AJ' . $row)->getAlignment()->setWrapText(true);
       $sheet->setCellValue('AK' . $row, $objOrders->notes);
-      
+
       $colIndex = 38; // Column AL
 
       if (class_exists('Veello\IsotopeAffiliatesBundle\VeelloIsotopeAffiliatesBundle')) {
@@ -301,7 +307,7 @@ function toggleSeparator(format) {
         $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++) . $row, $objAffiliateMember->company);
         $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex++) . $row, $objAffiliateMember->city);
       }
-      
+
       if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle') && $objOrders->freeProduct > 0) {
         $objFreeProduct = \Database::getInstance()->prepare("SELECT sku, name FROM tl_iso_product WHERE id=?")->execute($objOrders->freeProduct);
         if($objFreeProduct->numRows > 0) {
@@ -316,7 +322,7 @@ function toggleSeparator(format) {
 
       $row++;
     }
-    
+
     // Output
     $this->saveToBrowser($spreadsheet, $format, $separator);
   }
@@ -329,11 +335,11 @@ function toggleSeparator(format) {
    * @param string $separator
    */
   public function exportOrdersData($dateFrom, $dateTo, $format, $separator)
-  {    
+  {
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
     $arrKeys = array('order_id', 'date', 'company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email', 'items', 'tax_free_subtotal', 'total', 'tax_label');
-    
+
     $lastColumnLetter = '';
     foreach ($arrKeys as $k => $v) {
       $columnLetter = chr(65 + $k);
@@ -344,16 +350,18 @@ function toggleSeparator(format) {
     $sheet->freezePane('A2');
     $sheet->getStyle('A1:' . $lastColumnLetter . '1')->getFont()->setBold(true);
 
-    foreach (range('A', $lastColumnLetter) as $columnID) {
+    $lastColumnIndex = count($arrKeys);
+    for ($i = 1; $i <= $lastColumnIndex; $i++) {
+        $columnID = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i);
         $sheet->getColumnDimension($columnID)->setAutoSize(true);
     }
 
-    $objOrders = \Database::getInstance()->prepare("SELECT *, tl_iso_product_collection.id as collection_id 
-                                                    FROM tl_iso_product_collection, tl_iso_address 
-                                                    WHERE tl_iso_product_collection.billing_address_id = tl_iso_address.id 
+    $objOrders = \Database::getInstance()->prepare("SELECT *, tl_iso_product_collection.id as collection_id
+                                                    FROM tl_iso_product_collection, tl_iso_address
+                                                    WHERE tl_iso_product_collection.billing_address_id = tl_iso_address.id
                                                       AND type = 'order'
-                                                      AND document_number != '' 
-                                                      AND locked >= ? 
+                                                      AND document_number != ''
+                                                      AND locked >= ?
                                                       AND locked <= ?
                                                     ORDER BY document_number ASC")
                                          ->execute(strtotime($dateFrom . " 00:00:00"), strtotime($dateTo . " 23:59:59"));
@@ -376,8 +384,8 @@ function toggleSeparator(format) {
         // wenn schon ein Produkt da ist, dann einen Zeilenumbruch machen für Excel
         if (strlen($strOrderItems) > 0) {
           $strOrderItems .= PHP_EOL;
-        }  
-        
+        }
+
         $productName = strip_tags($this->replaceInsertTags($objOrderItems->name));
 
         $strOrderItems .= html_entity_decode(
@@ -386,7 +394,7 @@ function toggleSeparator(format) {
         " (" . strip_tags(Isotope::formatPriceWithCurrency($objOrderItems->quantity * $objOrderItems->price)) . ")"
         );
       }
-      
+
       if (class_exists('Roschis\IsotopeFreeProductBundle\RoschisIsotopeFreeProductBundle') && $objOrders->freeProduct > 0) {
         $objFreeProduct = \Database::getInstance()->prepare("SELECT sku, name FROM tl_iso_product WHERE id=?")->execute($objOrders->freeProduct);
         if ($objFreeProduct->numRows > 0) {
@@ -416,11 +424,11 @@ function toggleSeparator(format) {
       $sheet->setCellValue('O' . $row, html_entity_decode($objTax->label));
       $row++;
     }
-    
+
     // Output
     $this->saveToBrowser($spreadsheet, $format, $separator);
   }
-  
+
 /**
    * Export orders and send them to browser as file
    * @param date $dateFrom
@@ -444,7 +452,9 @@ function toggleSeparator(format) {
     $sheet->freezePane('A2');
     $sheet->getStyle('A1:' . $lastColumnLetter . '1')->getFont()->setBold(true);
 
-    foreach (range('A', $lastColumnLetter) as $columnID) {
+    $lastColumnIndex = count($arrKeys);
+    for ($i = 1; $i <= $lastColumnIndex; $i++) {
+        $columnID = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i);
         $sheet->getColumnDimension($columnID)->setAutoSize(true);
     }
 
@@ -536,7 +546,7 @@ function toggleSeparator(format) {
     // Output
     $this->saveToBrowser($spreadsheet, $format, $separator);
   }
-  
+
   /**
    * Export orders and send them to browser as file
    * @param date $dateFrom
@@ -545,7 +555,7 @@ function toggleSeparator(format) {
    * @param string $separator
    */
   public function exportBankData($dateFrom, $dateTo, $format, $separator)
-  {     
+  {
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
     $arrKeys = array('company', 'lastname', 'firstname', 'street', 'postal', 'city', 'country', 'phone', 'email');
@@ -560,17 +570,19 @@ function toggleSeparator(format) {
     $sheet->freezePane('A2');
     $sheet->getStyle('A1:' . $lastColumnLetter . '1')->getFont()->setBold(true);
 
-    foreach (range('A', $lastColumnLetter) as $columnID) {
+    $lastColumnIndex = count($arrKeys);
+    for ($i = 1; $i <= $lastColumnIndex; $i++) {
+        $columnID = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i);
         $sheet->getColumnDimension($columnID)->setAutoSize(true);
     }
 
-    $objOrders = \Database::getInstance()->prepare("SELECT tl_iso_address.* FROM tl_iso_product_collection, tl_iso_address 
-                                                    WHERE tl_iso_product_collection.billing_address_id = tl_iso_address.id 
+    $objOrders = \Database::getInstance()->prepare("SELECT tl_iso_address.* FROM tl_iso_product_collection, tl_iso_address
+                                                    WHERE tl_iso_product_collection.billing_address_id = tl_iso_address.id
                                                       AND type = 'order'
-                                                      AND locked >= ? 
+                                                      AND locked >= ?
                                                       AND locked <= ?
                                                     GROUP BY member")
-                                         ->execute(strtotime($dateFrom . " 00:00:00"), strtotime($dateTo . " 23:59:59")); 
+                                         ->execute(strtotime($dateFrom . " 00:00:00"), strtotime($dateTo . " 23:59:59"));
 
     if (null === $objOrders) {
       return '<p class="tl_error">'. $GLOBALS['TL_LANG']['MSC']['noOrders'] .'</p>';
@@ -589,21 +601,21 @@ function toggleSeparator(format) {
       $sheet->setCellValue('I' . $row, $objOrders->email);
       $row++;
     }
-  
+
     // Output
     $this->saveToBrowser($spreadsheet, $format, $separator);
-  }  
-  
-  
+  }
+
+
   /**
    * Save the file to the browser
    * @param Spreadsheet $spreadsheet
    * @param string $format
    * @param string $separator
    * @return void
-   */   
-  protected function saveToBrowser($spreadsheet, $format, $separator) 
-  {  
+   */
+  protected function saveToBrowser($spreadsheet, $format, $separator)
+  {
     // Setze die HTTP-Header für den Download
     switch ($format) {
       case 'csv':
@@ -629,7 +641,7 @@ function toggleSeparator(format) {
         $writer->save('php://output');
         break;
       default:
-        throw new Exception('Unsupported format: ' . $format);  
+        throw new Exception('Unsupported format: ' . $format);
     }
 
     // Notiz anzeigen
